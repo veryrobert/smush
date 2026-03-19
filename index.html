@@ -6,6 +6,7 @@
 <title>Barry's Beans — Smush!</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@hackernoon/pixel-icon-library/fonts/iconfont.css" rel="stylesheet">
 <style>
 /* ── RESET ── */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -75,16 +76,14 @@ html,body{width:100%;height:100vh;height:100svh;background:#000;font-family:'Pix
    SHARED LEADERBOARD COMPONENT
 ══════════════════════════════════ */
 .lb-list{display:flex;flex-direction:column;gap:1px}
-.lb-row{display:flex;align-items:center;gap:10px;padding:9px 10px;background:#0d0d0d;border-left:2px solid transparent;position:relative}
-.lb-del{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#d93025;font-size:14px;cursor:pointer;opacity:0;padding:4px 6px;font-family:inherit;transition:opacity 0.15s;line-height:1}
-.lb-row:hover .lb-del,.lb-row:focus-within .lb-del{opacity:1}
-.lb-row:hover .lb-rank,.lb-row:focus-within .lb-rank{opacity:0}
-@media (pointer:coarse){.lb-del{opacity:0.4}}
+.lb-row{display:flex;align-items:center;gap:10px;padding:9px 10px;background:#0d0d0d;border-left:2px solid transparent}
+.lb-del{background:none;border:none;color:#d93025;font-size:12px;cursor:pointer;padding:2px 6px;font-family:inherit;line-height:1;flex-shrink:0;opacity:0.35;transition:opacity 0.15s}
+.lb-del:hover{opacity:1}
 .lb-row.gold{border-color:#f7c948;background:#110e00}
 .lb-row.silver{border-color:#888}
 .lb-row.bronze{border-color:#a0522d}
 .lb-row.me{border-color:#00e5ff;background:#001520}
-.lb-rank{font-size:10px;color:#444;width:18px;text-align:center;flex-shrink:0;transition:opacity 0.15s}
+.lb-rank{font-size:10px;color:#444;width:18px;text-align:center;flex-shrink:0}
 .lb-row.gold .lb-rank{color:#f7c948}
 .lb-row.silver .lb-rank{color:#aaa}
 .lb-row.bronze .lb-rank{color:#cd7f32}
@@ -210,16 +209,16 @@ canvas#game-canvas{display:block;width:100%;height:100%}
         <div class="field-hint" id="name-hint"></div>
       </div>
 
-      <button class="btn btn-yellow" id="play-btn">PLAY →</button>
+      <button class="btn btn-yellow" id="play-btn"><i class="hn hn-play"></i> PLAY</button>
 
-      <button class="btn btn-ghost" id="scores-btn">⬆ Leaderboard</button>
+      <button class="btn btn-ghost" id="scores-btn"><i class="hn hn-trophy"></i> Leaderboard</button>
     </div>
   </div>
 
   <!-- ══ LEADERBOARD PAGE ══ -->
   <div class="page" id="page-scores">
     <div class="page-header">
-      <button class="back-btn" id="scores-back">← Back</button>
+      <button class="back-btn" id="scores-back"><i class="hn hn-arrow-left"></i> Back</button>
       <div class="page-title">Leaderboard</div>
     </div>
     <div class="lb-scroll" id="scores-lb-wrap">
@@ -314,8 +313,8 @@ canvas#game-canvas{display:block;width:100%;height:100%}
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-yellow" id="again-btn">PLAY AGAIN →</button>
-      <button class="btn btn-ghost"  id="home-btn">← Change Name</button>
+      <button class="btn btn-yellow" id="again-btn"><i class="hn hn-refresh"></i> PLAY AGAIN</button>
+      <button class="btn btn-ghost"  id="home-btn"><i class="hn hn-home"></i> Change Name</button>
     </div>
   </div>
 
@@ -434,7 +433,7 @@ function renderLB(scores, container, highlightName) {
       <div class="lb-name">${s.name}</div>
       <div class="lb-wave">W${s.wave}</div>
       <div class="lb-score">${s.score.toLocaleString()}</div>
-      <button class="lb-del" data-idx="${i}" aria-label="Delete">×</button>
+      <button class="lb-del" data-idx="${i}" aria-label="Delete"><i class="hn hn-trash"></i></button>
     </div>`;
   }).join('');
   container.innerHTML = `<div class="lb-list">${rows}</div>`;
@@ -671,7 +670,7 @@ function gameLoop(ts) {
   if (ts - lastSpawn > cfg.spawnMs) {
     const lanePool = Array.from({length:cfg.lanes},(_,i)=>i);
     const lane = lanePool[Math.floor(Math.random()*lanePool.length)];
-    beans.push({ lane, imgIdx:Math.floor(Math.random()*BEAN_IMGS.length),
+    beans.push({ lane, imgIdx:lane,
       y:-BEAN_SZ, x:lane*laneW+laneW/2-BEAN_SZ/2,
       speed:cfg.speed, hit:false, missed:false });
     lastSpawn = ts;
