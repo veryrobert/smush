@@ -220,6 +220,7 @@ canvas#game-canvas{display:block;width:100%;height:100%}
     <div class="page-header">
       <button class="back-btn" id="scores-back"><i class="hn hn-arrow-left"></i> Back</button>
       <div class="page-title">Leaderboard</div>
+      <button class="back-btn" id="clear-btn" style="margin-left:auto;color:#d93025;border-color:#2a0000"><i class="hn hn-trash"></i> Clear</button>
     </div>
     <div class="lb-scroll" id="scores-lb-wrap">
       <div class="dots-wrap"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
@@ -925,6 +926,18 @@ document.getElementById('play-btn').addEventListener('click', () => {
 
 document.getElementById('scores-btn').addEventListener('click', ()=> navigate('/scores'));
 document.getElementById('scores-back').addEventListener('click', ()=> navigate('/', {back:true}));
+document.getElementById('clear-btn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('clear-btn');
+  btn.textContent = '...';
+  await fetch(API, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json','X-Master-Key':API_KEY},
+    body: JSON.stringify({ scores: [] })
+  });
+  const wrap = document.getElementById('scores-lb-wrap');
+  renderLB([], wrap, null);
+  btn.innerHTML = '<i class="hn hn-trash"></i> Clear';
+});
 document.getElementById('again-btn').addEventListener('click', startGame);
 document.getElementById('how-ready-btn').addEventListener('click', dismissHowTo);
 document.getElementById('home-btn').addEventListener('click', ()=>{ stopBgAnim(); navigate('/',{back:true}); startBgAnim(); });
