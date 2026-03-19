@@ -26,6 +26,7 @@ html,body{width:100%;height:100vh;height:100svh;background:#000;font-family:'Pix
 }
 .page.active{transform:translateX(0)}
 .page.exit-left{transform:translateX(-100%)}
+.page.exit-right{transform:translateX(100%)}
 
 /* ══════════════════════════════════
    START PAGE  #/
@@ -384,25 +385,30 @@ function routeTo(path, data={}) {
   const pageId = PAGES[path] || 'page-start';
   if (currentPage === pageId) return;
 
-  // exit old
+  const isBack = !!data.back;
+
+  // exit old page — slides right if going back, left if going forward
   if (currentPage) {
     const old = document.getElementById(currentPage);
     old.classList.remove('active');
-    old.classList.add('exit-left');
-    setTimeout(() => old.classList.remove('exit-left'), 400);
+    old.classList.add(isBack ? 'exit-right' : 'exit-left');
+    setTimeout(() => old.classList.remove('exit-right','exit-left'), 400);
   }
 
   prevPage = currentPage;
   currentPage = pageId;
 
   const next = document.getElementById(pageId);
-  // if going back, slide from left
-  if (data.back) {
-    next.style.transform = 'translateX(-100%)';
-    requestAnimationFrame(() => {
+  if (isBack) {
+    // enter from left — set position before transition starts
+    next.style.transition = 'none';
+    next.style.transform  = 'translateX(-100%)';
+    // double-rAF ensures the browser paints the off-screen position first
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      next.style.transition = '';
       next.classList.add('active');
-      next.style.transform = '';
-    });
+      next.style.transform  = '';
+    }));
   } else {
     next.classList.add('active');
   }
@@ -548,18 +554,19 @@ document.querySelectorAll('.btn').forEach(btn => {
 const BEAN_IMGS = BEAN_SRCS.map(s => { const i=new Image(); i.src=s; return i; });
 const LANE_COLORS = ['#f7c948','#39b54a','#00e5ff','#e91e63'];
 
+// speed=px/s  spawnMs=ms between beans  beans=to advance wave
 const WAVES = [
-  {speed:220, spawnMs:1800, maxMiss:6, lanes:4},
-  {speed:180, spawnMs:2000, maxMiss:5, lanes:4},
-  {speed:230, spawnMs:1600, maxMiss:5, lanes:4},
-  {speed:310, spawnMs:1150, maxMiss:4, lanes:4},
-  {speed:370, spawnMs:950,  maxMiss:3, lanes:4},
-  {speed:440, spawnMs:780,  maxMiss:3, lanes:4},
-  {speed:520, spawnMs:640,  maxMiss:2, lanes:4},
-  {speed:610, spawnMs:520,  maxMiss:2, lanes:4},
-  {speed:700, spawnMs:430,  maxMiss:1, lanes:4}, // brutal
+  {speed:200, spawnMs:1400, maxMiss:6, beans: 8}, // easy intro, short
+  {speed:340, spawnMs:700,  maxMiss:5, beans:12}, // BIG jump
+  {speed:390, spawnMs:630,  maxMiss:5, beans:12}, // tapering
+  {speed:430, spawnMs:570,  maxMiss:4, beans:14},
+  {speed:470, spawnMs:520,  maxMiss:4, beans:14},
+  {speed:510, spawnMs:480,  maxMiss:3, beans:14},
+  {speed:550, spawnMs:450,  maxMiss:3, beans:14},
+  {speed:600, spawnMs:410,  maxMiss:2, beans:14},
+  {speed:660, spawnMs:370,  maxMiss:1, beans:14}, // brutal
 ];
-const SUBS = ['GET READY','FASTER...','KEEP UP!','DON\'T MISS!','SERIOUSLY?!','INCREDIBLE','LEGENDARY','UNSTOPPABLE','INHUMAN'];
+const SUBS = ['GET READY','MUCH FASTER!','KEEP UP!','DON\'T MISS!','SERIOUSLY?!','INCREDIBLE','LEGENDARY','UNSTOPPABLE','INHUMAN'];
 const getWave = n => WAVES[Math.min(n-1,WAVES.length-1)];
 
 let playerName = '';
@@ -567,7 +574,6 @@ let beanName   = '';
 let score=0, combo=0, misses=0, waveNum=1, waveHits=0;
 let beans=[], splats=[], particles=[];
 let lastSpawn=0, gameRunning=false, animId2=null, lastTs=0;
-const BEANS_PER_WAVE = 14;
 const BEAN_SZ = 50;
 const HIT_H   = 70;
 
@@ -714,7 +720,7 @@ function gameLoop(ts) {
   draw();
 
   // Wave up
-  if (waveHits >= BEANS_PER_WAVE) {
+  if (waveHits >= cfg.beans) {
     waveHits=0; waveNum++;
     gameRunning=false;
     cancelAnimationFrame(animId2);
