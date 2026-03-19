@@ -118,10 +118,10 @@ html,body{width:100%;height:100vh;height:100svh;background:#000;font-family:'Pix
 .hud-combo.bump{transform:scale(1.3)}
 .hud-wave{font-size:9px;color:#444;letter-spacing:2px}
 
-.miss-bar{width:100%;display:flex;gap:5px;padding:5px 16px;flex-shrink:0;align-items:center}
-.miss-label{font-size:7px;color:#333;letter-spacing:1px;text-transform:uppercase;margin-right:2px}
-.miss-dot{width:9px;height:9px;border-radius:1px;background:#0d0000;border:1px solid #1a0000;transition:all 0.25s}
-.miss-dot.used{background:#d93025;border-color:#d93025;box-shadow:0 0 6px #d93025}
+.miss-bar{width:100%;display:flex;gap:4px;padding:4px 16px;flex-shrink:0;align-items:center}
+.miss-label{font-size:7px;color:#333;letter-spacing:1px;text-transform:uppercase;margin-right:4px}
+.miss-dot{font-size:16px;color:#d93025;transition:all 0.25s;line-height:1;text-shadow:0 0 8px #d93025}
+.miss-dot.used{color:#1a0000;text-shadow:none}
 
 #canvas-wrap{flex:1;width:100%;position:relative;overflow:hidden}
 canvas#game-canvas{display:block;width:100%;height:100%}
@@ -623,13 +623,13 @@ function updateHUD() {
   comboEl.textContent = combo>=2 ? `×${comboMult()} COMBO` : '';
   document.getElementById('hud-wave').textContent  = `Wave ${waveNum}`;
 
-  // miss dots
+  // lives hearts — full = remaining, dim = lost
   const cfg = getWave(waveNum);
   const bar = document.getElementById('miss-dots');
   bar.innerHTML = '';
   for (let i=0; i<cfg.maxMiss; i++) {
-    const d=document.createElement('div');
-    d.className='miss-dot'+(i<misses?' used':'');
+    const d=document.createElement('i');
+    d.className='hn hn-heart miss-dot'+(i<misses?' used':'');
     bar.appendChild(d);
   }
 }
@@ -716,7 +716,13 @@ function gameLoop(ts) {
   if (waveHits >= BEANS_PER_WAVE) {
     waveHits=0; waveNum++;
     gameRunning=false;
-    announceWave(waveNum, ()=>{ gameRunning=true; });
+    cancelAnimationFrame(animId2);
+    announceWave(waveNum, ()=>{
+      gameRunning=true;
+      lastTs=performance.now();
+      animId2=requestAnimationFrame(gameLoop);
+    });
+    return;
   }
 
   animId2 = requestAnimationFrame(gameLoop);
