@@ -78,12 +78,13 @@ html,body{width:100%;height:100%;background:#000;font-family:'Pixelify Sans',mon
 .lb-row{display:flex;align-items:center;gap:10px;padding:9px 10px;background:#0d0d0d;border-left:2px solid transparent;position:relative}
 .lb-del{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#d93025;font-size:14px;cursor:pointer;opacity:0;padding:4px 6px;font-family:inherit;transition:opacity 0.15s;line-height:1}
 .lb-row:hover .lb-del,.lb-row:focus-within .lb-del{opacity:1}
+.lb-row:hover .lb-rank,.lb-row:focus-within .lb-rank{opacity:0}
 @media (pointer:coarse){.lb-del{opacity:0.4}}
 .lb-row.gold{border-color:#f7c948;background:#110e00}
 .lb-row.silver{border-color:#888}
 .lb-row.bronze{border-color:#a0522d}
 .lb-row.me{border-color:#00e5ff;background:#001520}
-.lb-rank{font-size:10px;color:#444;width:18px;text-align:center;flex-shrink:0}
+.lb-rank{font-size:10px;color:#444;width:18px;text-align:center;flex-shrink:0;transition:opacity 0.15s}
 .lb-row.gold .lb-rank{color:#f7c948}
 .lb-row.silver .lb-rank{color:#aaa}
 .lb-row.bronze .lb-rank{color:#cd7f32}
@@ -145,6 +146,23 @@ canvas#game-canvas{display:block;width:100%;height:100%}
 .lane-btn.flash{background:#111}
 .lane-tap{font-size:16px;line-height:1;pointer-events:none}
 .lane-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;opacity:0.7;pointer-events:none}
+
+/* ── HOW TO PLAY OVERLAY ── */
+.how-overlay{position:absolute;inset:0;background:#000;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:28px 24px;opacity:1;transition:opacity 0.3s}
+.how-overlay.hidden{opacity:0;pointer-events:none}
+.how-title{font-size:18px;color:#f7c948;letter-spacing:4px}
+.how-diagram{display:flex;gap:12px;align-items:flex-end;justify-content:center}
+.how-lane{display:flex;flex-direction:column;align-items:center;gap:6px;width:60px}
+.how-bean{font-size:28px;animation:how-drop 1.4s ease-in infinite}
+.how-arrow{font-size:18px;color:#555;animation:how-drop 1.4s ease-in infinite;animation-delay:0.1s}
+.how-ring{font-size:28px;color:#f7c948;text-shadow:0 0 12px #f7c948}
+.how-smash{font-size:10px;color:#39b54a;letter-spacing:2px;animation:how-pop 1.4s ease-in infinite}
+@keyframes how-drop{0%,100%{transform:translateY(-10px);opacity:0.3}60%{transform:translateY(0);opacity:1}70%,99%{transform:translateY(0);opacity:0}}
+@keyframes how-pop{0%,59%{opacity:0;transform:scale(0.8)}70%{opacity:1;transform:scale(1.2)}85%,100%{opacity:0}}
+.how-steps{display:flex;flex-direction:column;gap:10px;width:100%;max-width:260px}
+.how-step{font-size:11px;color:#aaa;letter-spacing:1px;display:flex;align-items:flex-start;gap:10px;line-height:1.5}
+.how-step strong{color:#f5f0e8}
+.how-num{width:18px;height:18px;border-radius:50%;background:#1a1a1a;border:1px solid #333;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#f7c948;flex-shrink:0;margin-top:1px}
 
 /* ══════════════════════════════════
    GAME OVER PAGE  #/over
@@ -220,6 +238,25 @@ canvas#game-canvas{display:block;width:100%;height:100%}
     <div class="miss-bar">
       <div class="miss-label">Lives</div>
       <div id="miss-dots"></div>
+    </div>
+
+    <!-- How to play overlay -->
+    <div class="how-overlay hidden" id="how-overlay">
+      <div class="how-title">HOW TO PLAY</div>
+      <div class="how-diagram">
+        <div class="how-lane">
+          <div class="how-bean how-bean-fall">🫘</div>
+          <div class="how-arrow">↓</div>
+          <div class="how-ring">◯</div>
+          <div class="how-smash">TAP!</div>
+        </div>
+      </div>
+      <div class="how-steps">
+        <div class="how-step"><span class="how-num">1</span>Beans fall down the lanes</div>
+        <div class="how-step"><span class="how-num">2</span>When a bean hits the ring — <strong>tap that lane</strong></div>
+        <div class="how-step"><span class="how-num">3</span>Miss too many and it's game over</div>
+      </div>
+      <button class="btn btn-yellow" id="how-ready-btn">LET'S GO →</button>
     </div>
 
     <div id="canvas-wrap">
@@ -773,6 +810,8 @@ function hitLane(lane) {
 // ══════════════════════════════════════════════════
 //  START / END
 // ══════════════════════════════════════════════════
+let hasPlayedBefore = false;
+
 function startGame() {
   score=0; combo=0; misses=0; waveNum=1; waveHits=0;
   beans=[]; splats=[]; particles=[]; lastSpawn=0;
@@ -781,12 +820,31 @@ function startGame() {
   navigate('/play');
   setTimeout(()=>{
     resizeCanvas();
+    if (!hasPlayedBefore) {
+      // show how-to-play, game starts after dismiss
+      const overlay = document.getElementById('how-overlay');
+      overlay.classList.remove('hidden');
+    } else {
+      announceWave(1,()=>{
+        gameRunning=true;
+        lastTs=performance.now();
+        animId2=requestAnimationFrame(gameLoop);
+      });
+    }
+  }, 400);
+}
+
+function dismissHowTo() {
+  hasPlayedBefore = true;
+  const overlay = document.getElementById('how-overlay');
+  overlay.classList.add('hidden');
+  setTimeout(()=>{
     announceWave(1,()=>{
       gameRunning=true;
       lastTs=performance.now();
       animId2=requestAnimationFrame(gameLoop);
     });
-  }, 400);
+  }, 300);
 }
 
 async function endGame() {
@@ -838,6 +896,7 @@ document.getElementById('play-btn').addEventListener('click', () => {
 document.getElementById('scores-btn').addEventListener('click', ()=> navigate('/scores'));
 document.getElementById('scores-back').addEventListener('click', ()=> navigate('/', {back:true}));
 document.getElementById('again-btn').addEventListener('click', startGame);
+document.getElementById('how-ready-btn').addEventListener('click', dismissHowTo);
 document.getElementById('home-btn').addEventListener('click', ()=>{ stopBgAnim(); navigate('/',{back:true}); startBgAnim(); });
 
 // Lane input handled by pointerdown on each button (see below)
