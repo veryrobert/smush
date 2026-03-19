@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<title>Barry's Beans — Digital Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    font-family: 'Pixelify Sans', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .prototype-label {
+    color: #444;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .screens-row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .screen-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .screen-label {
+    color: #444;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* iPhone 16 ratio ~390:844 → scaled to 260:563 */
+  .phone {
+    width: 260px;
+    height: 563px;
+    background: #0a0a0a;
+    border-radius: 36px;
+    border: 2px solid #222;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px #111, 0 20px 60px rgba(0,0,0,0.8);
+  }
+
+  /* Notch */
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 22px;
+    background: #0a0a0a;
+    border-radius: 0 0 14px 14px;
+    z-index: 10;
+    border-bottom: 2px solid #1a1a1a;
+    border-left: 2px solid #1a1a1a;
+    border-right: 2px solid #1a1a1a;
+  }
+
+  .screen-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 0 0;
+  }
+
+  :root {
+    --yellow: #f7c948;
+    --orange: #e8621a;
+    --red:    #d93025;
+    --green:  #39b54a;
+    --cyan:   #00e5ff;
+    --purple: #9c27b0;
+    --pink:   #e91e63;
+    --cream:  #f5f0e8;
+    --dark:   #0a0a0a;
+    --mid:    #111;
+    --dim:    #222;
+    --text:   #f5f0e8;
+  }
+
+  /* ─────────────────────────────
+     SCREEN 1 — CODE ENTRY
+  ───────────────────────────── */
+  .s1 { background: #0a0a0a; }
+
+  .logo-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 0 0;
+  }
+
+  .logo-block h1 {
+    font-size: 15px;
+    color: var(--yellow);
+    letter-spacing: 3px;
+    text-align: center;
+    line-height: 1.1;
+  }
+
+  .s1 .hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    gap: 18px;
+  }
+
+  .tagline {
+    font-size: 9px;
+    color: #555;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .code-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .code-label {
+    font-size: 9px;
+    color: #555;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .code-input {
+    background: #111;
+    border: 2px solid #222;
+    padding: 10px 14px;
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 18px;
+    color: var(--yellow);
+    letter-spacing: 6px;
+    text-align: center;
+    width: 100%;
+    outline: none;
+  }
+
+  .code-input::placeholder { color: #333; }
+
+  .hint-text {
+    font-size: 8px;
+    color: #333;
+    text-align: center;
+    letter-spacing: 1px;
+    line-height: 1.6;
+  }
+
+  .btn-primary {
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    padding: 12px;
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 13px;
+    letter-spacing: 3px;
+    width: 100%;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 #c4a030;
+  }
+
+  .s1 .bottom-area {
+    padding: 0 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .falling-preview {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 0 4px;
+  }
+
+  /* ─────────────────────────────
+     SCREEN 2 — GAME
+  ───────────────────────────── */
+  .s2 { background: #050508; }
+
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px 0;
+  }
+
+  .game-logo { font-size: 10px; color: var(--yellow); letter-spacing: 2px; }
+
+  .score-box { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+  .score-label { font-size: 7px; color: #555; letter-spacing: 2px; }
+  .score-val   { font-size: 20px; color: var(--cyan); }
+
+  .combo-bar {
+    padding: 3px 14px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .combo-label { font-size: 7px; color: #555; letter-spacing: 2px; }
+  .combo-dots  { display: flex; gap: 3px; }
+  .cdot { width: 6px; height: 6px; border-radius: 1px; }
+  .cdot.lit { background: var(--orange); box-shadow: 0 0 4px var(--orange); }
+  .cdot.dim { background: #1a1a1a; }
+
+  .game-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    padding: 4px 0;
+  }
+
+  .lanes {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: space-around;
+  }
+  .lane-line { width: 1px; height: 100%; background: #111; }
+
+  .falling-bean { position: absolute; }
+
+  .hit-zone {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    border-top: 2px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 10px;
+    background: linear-gradient(to top, #050508, transparent);
+  }
+
+  .hit-target {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ht-g { border-color: var(--green);  box-shadow: 0 0 10px var(--green);  }
+  .ht-c { border-color: var(--cyan);   box-shadow: 0 0 10px var(--cyan);   }
+  .ht-y { border-color: var(--yellow); box-shadow: 0 0 10px var(--yellow); }
+  .ht-r { border-color: var(--pink);   box-shadow: 0 0 10px var(--pink);   }
+
+  .splat    { position: absolute; }
+  .score-pop { position: absolute; }
+
+  /* ─────────────────────────────
+     SCREEN 3 — LEADERBOARD
+  ───────────────────────────── */
+  .s3 { background: #0a0a0a; }
+
+  .lb-header {
+    padding: 8px 18px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .lb-title { font-size: 18px; color: var(--yellow); letter-spacing: 3px; }
+  .lb-sub   { font-size: 8px; color: #555; letter-spacing: 2px; text-transform: uppercase; }
+  .lb-week  { font-size: 7px; color: #333; letter-spacing: 1px; }
+
+  .lb-list {
+    flex: 1;
+    padding: 10px 12px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow: hidden;
+  }
+
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: #111;
+    border-left: 3px solid transparent;
+  }
+  .lb-row.first  { border-color: var(--yellow); background: #131000; }
+  .lb-row.second { border-color: #888; }
+  .lb-row.third  { border-color: #a0522d; }
+  .lb-row.me     { border-color: var(--cyan); background: #001520; }
+
+  .lb-rank { font-size: 11px; color: #444; width: 14px; text-align: center; }
+  .lb-row.first  .lb-rank { color: var(--yellow); }
+  .lb-row.second .lb-rank { color: #aaa; }
+  .lb-row.third  .lb-rank { color: #cd7f32; }
+
+  .lb-bean { width: 20px; height: 12px; flex-shrink: 0; }
+
+  .lb-name  { flex: 1; font-size: 11px; color: var(--text); letter-spacing: 1px; }
+  .lb-row.me .lb-name { color: var(--cyan); }
+
+  .lb-score { font-size: 11px; color: #444; letter-spacing: 1px; }
+  .lb-row.first .lb-score { color: var(--yellow); }
+  .lb-row.me    .lb-score { color: var(--cyan); }
+
+  .lb-footer {
+    padding: 10px 12px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .prize-banner {
+    background: var(--yellow);
+    color: #000;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    text-align: center;
+    width: 100%;
+    box-shadow: 3px 3px 0 #c4a030;
+  }
+
+  .my-score-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 8px;
+    color: #333;
+    letter-spacing: 1px;
+    padding: 0 4px;
+  }
+
+  /* ─────────────────────────────
+     SCREEN 4 — WINNER
+  ───────────────────────────── */
+  .s4 { background: #050508; }
+
+  .winner-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px 24px;
+  }
+
+  .blink-txt {
+    font-size: 9px;
+    color: var(--yellow);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .winner-name  { font-size: 24px; color: var(--cream); letter-spacing: 2px; text-align: center; }
+  .winner-score { font-size: 10px; color: #444; letter-spacing: 2px; }
+
+  .winner-message {
+    font-size: 8px; color: #444; letter-spacing: 1px;
+    text-align: center; line-height: 1.7; max-width: 160px;
+  }
+
+  .coupon {
+    width: 100%;
+    border: 2px dashed var(--yellow);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: #110f00;
+  }
+  .coupon-label { font-size: 7px; color: #555; letter-spacing: 3px; text-transform: uppercase; }
+  .coupon-code  { font-size: 20px; color: var(--yellow); letter-spacing: 6px; }
+  .coupon-fine  { font-size: 7px; color: #333; letter-spacing: 1px; text-align: center; line-height: 1.5; }
+
+  .play-again { font-size: 9px; color: #333; letter-spacing: 2px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<div class="prototype-label">Barry's Beans — Digital Prototype — MA UX</div>
+
+<!--
+  ██████╗ ███████╗ █████╗ ███╗  ██╗    ██████╗  █████╗  ██████╗ ███████╗
+  ██╔══██╗██╔════╝██╔══██╗████╗ ██║    ██╔══██╗██╔══██╗██╔════╝ ██╔════╝
+  ██████╦╝█████╗  ███████║██╔██╗██║    ██████╔╝███████║██║  ███╗█████╗
+  ██╔══██╗██╔══╝  ██╔══██║██║╚████║    ██╔═══╝ ██╔══██║██║   ██║██╔══╝
+  ██████╦╝███████╗██║  ██║██║ ╚███║    ██║     ██║  ██║╚██████╔╝███████╗
+  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚══╝   ╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+-->
+
+<div class="screens-row">
+
+<!-- ══════════════════════════════════════
+     SCREEN 1 — COFFEE CODE ENTRY
+══════════════════════════════════════ -->
+<div class="screen-wrap">
+<div class="phone s1">
+<div class="screen-inner">
+
+  <div class="logo-block">
+    <!-- Pixel logo bean: 16x10 horizontal jelly bean -->
+    <svg width="40" height="25" viewBox="0 0 16 10" image-rendering="pixelated">
+      <rect x="4" y="0" width="8" height="1" fill="#f7c948"/>
+      <rect x="2" y="1" width="12" height="1" fill="#f7c948"/>
+      <rect x="1" y="2" width="14" height="1" fill="#f7c948"/>
+      <rect x="0" y="3" width="16" height="4" fill="#f7c948"/>
+      <rect x="1" y="7" width="14" height="1" fill="#f7c948"/>
+      <rect x="2" y="8" width="12" height="1" fill="#f7c948"/>
+      <rect x="4" y="9" width="8"  height="1" fill="#f7c948"/>
+      <!-- highlight -->
+      <rect x="2" y="3" width="3" height="3" fill="#ffe580"/>
+      <rect x="2" y="2" width="5" height="1" fill="#ffe580"/>
+      <!-- crease -->
+      <rect x="8" y="3" width="1" height="4" fill="#c4a030"/>
+      <!-- shadow -->
+      <rect x="13" y="3" width="3" height="4" fill="#c4a030"/>
+      <rect x="12" y="7" width="3" height="1" fill="#c4a030"/>
+    </svg>
+    <h1>BARRY'S<br>BEANS</h1>
+  </div>
+
+  <div class="hero">
+    <div class="tagline">Buy a coffee. Smush beans. Win.</div>
+
+    <!-- Hero bean — large horizontal jelly bean, orange -->
+    <svg width="120" height="75" viewBox="0 0 32 20" image-rendering="pixelated">
+      <rect x="8"  y="0"  width="16" height="2" fill="#e8621a"/>
+      <rect x="4"  y="2"  width="24" height="2" fill="#e8621a"/>
+      <rect x="2"  y="4"  width="28" height="2" fill="#e8621a"/>
+      <rect x="0"  y="6"  width="32" height="8" fill="#e8621a"/>
+      <rect x="2"  y="14" width="28" height="2" fill="#e8621a"/>
+      <rect x="4"  y="16" width="24" height="2" fill="#e8621a"/>
+      <rect x="8"  y="18" width="16" height="2" fill="#e8621a"/>
+      <!-- highlight top-left -->
+      <rect x="3"  y="6"  width="6" height="4" fill="#f08040"/>
+      <rect x="3"  y="4"  width="10" height="2" fill="#f08040"/>
+      <rect x="6"  y="2"  width="6" height="2" fill="#f08040"/>
+      <rect x="2"  y="10" width="3" height="2" fill="#f08040"/>
+      <!-- specular -->
+      <rect x="4"  y="6"  width="3" height="2" fill="#ffa060"/>
+      <!-- crease -->
+      <rect x="16" y="6"  width="2" height="8" fill="#c44010"/>
+      <!-- shadow right -->
+      <rect x="26" y="6"  width="6" height="8" fill="#c44010"/>
+      <rect x="24" y="14" width="6" height="2" fill="#c44010"/>
+      <rect x="22" y="16" width="6" height="2" fill="#c44010"/>
+    </svg>
+
+    <div class="code-section">
+      <div class="code-label">Enter your coffee code</div>
+      <input class="code-input" type="text" value="BB-4821" maxlength="7"/>
+      <div class="hint-text">Find your unique code on today's Barry's cup</div>
+    </div>
+  </div>
+
+  <!-- Small falling beans preview -->
+  <div class="falling-preview">
+    <!-- Green bean mini -->
+    <svg width="16" height="10" viewBox="0 0 16 10" image-rendering="pixelated">
+      <rect x="4" y="0" width="8" height="1" fill="#39b54a"/>
+      <rect x="2" y="1" width="12" height="1" fill="#39b54a"/>
+      <rect x="1" y="2" width="14" height="1" fill="#39b54a"/>
+      <rect x="0" y="3" width="16" height="4" fill="#39b54a"/>
+      <rect x="1" y="7" width="14" height="1" fill="#39b54a"/>
+      <rect x="2" y="8" width="12" height="1" fill="#39b54a"/>
+      <rect x="4" y="9" width="8"  height="1" fill="#39b54a"/>
+      <rect x="2" y="3" width="3" height="3" fill="#5cd66e"/>
+      <rect x="8" y="3" width="1" height="4" fill="#2a8a36"/>
+      <rect x="13" y="3" width="3" height="4" fill="#2a8a36"/>
+    </svg>
+    <!-- Cyan bean mini -->
+    <svg width="16" height="10" viewBox="0 0 16 10" image-rendering="pixelated">
+      <rect x="4" y="0" width="8" height="1" fill="#00e5ff"/>
+      <rect x="2" y="1" width="12" height="1" fill="#00e5ff"/>
+      <rect x="1" y="2" width="14" height="1" fill="#00e5ff"/>
+      <rect x="0" y="3" width="16" height="4" fill="#00e5ff"/>
+      <rect x="1" y="7" width="14" height="1" fill="#00e5ff"/>
+      <rect x="2" y="8" width="12" height="1" fill="#00e5ff"/>
+      <rect x="4" y="9" width="8"  height="1" fill="#00e5ff"/>
+      <rect x="2" y="3" width="3" height="3" fill="#80f0ff"/>
+      <rect x="8" y="3" width="1" height="4" fill="#00a0c0"/>
+      <rect x="13" y="3" width="3" height="4" fill="#00a0c0"/>
+    </svg>
+    <!-- Pink bean mini -->
+    <svg width="16" height="10" viewBox="0 0 16 10" image-rendering="pixelated">
+      <rect x="4" y="0" width="8" height="1" fill="#e91e63"/>
+      <rect x="2" y="1" width="12" height="1" fill="#e91e63"/>
+      <rect x="1" y="2" width="14" height="1" fill="#e91e63"/>
+      <rect x="0" y="3" width="16" height="4" fill="#e91e63"/>
+      <rect x="1" y="7" width="14" height="1" fill="#e91e63"/>
+      <rect x="2" y="8" width="12" height="1" fill="#e91e63"/>
+      <rect x="4" y="9" width="8"  height="1" fill="#e91e63"/>
+      <rect x="2" y="3" width="3" height="3" fill="#ff6090"/>
+      <rect x="8" y="3" width="1" height="4" fill="#a0104a"/>
+      <rect x="13" y="3" width="3" height="4" fill="#a0104a"/>
+    </svg>
+    <!-- Purple bean mini -->
+    <svg width="16" height="10" viewBox="0 0 16 10" image-rendering="pixelated">
+      <rect x="4" y="0" width="8" height="1" fill="#9c27b0"/>
+      <rect x="2" y="1" width="12" height="1" fill="#9c27b0"/>
+      <rect x="1" y="2" width="14" height="1" fill="#9c27b0"/>
+      <rect x="0" y="3" width="16" height="4" fill="#9c27b0"/>
+      <rect x="1" y="7" width="14" height="1" fill="#9c27b0"/>
+      <rect x="2" y="8" width="12" height="1" fill="#9c27b0"/>
+      <rect x="4" y="9" width="8"  height="1" fill="#9c27b0"/>
+      <rect x="2" y="3" width="3" height="3" fill="#ce60e0"/>
+      <rect x="8" y="3" width="1" height="4" fill="#6a1880"/>
+      <rect x="13" y="3" width="3" height="4" fill="#6a1880"/>
+    </svg>
+  </div>
+
+  <div class="bottom-area">
+    <button class="btn-primary">PLAY →</button>
+  </div>
+
+</div>
+</div>
+<div class="screen-label">01 — Enter Code</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 2 — SMUSH GAME
+══════════════════════════════════════ -->
+<div class="screen-wrap">
+<div class="phone s2">
+<div class="screen-inner">
+
+  <div class="game-header">
+    <div class="game-logo">BB</div>
+    <div class="score-box">
+      <div class="score-label">SCORE</div>
+      <div class="score-val">4820</div>
+    </div>
+  </div>
+
+  <div class="combo-bar">
+    <div class="combo-label">COMBO</div>
+    <div class="combo-dots">
+      <div class="cdot lit"></div>
+      <div class="cdot lit"></div>
+      <div class="cdot lit"></div>
+      <div class="cdot lit"></div>
+      <div class="cdot lit"></div>
+      <div class="cdot dim"></div>
+      <div class="cdot dim"></div>
+      <div class="cdot dim"></div>
+    </div>
+    <div class="combo-label" style="color:#e8621a">x5</div>
+  </div>
+
+  <div class="game-area">
+    <div class="lanes">
+      <div class="lane-line"></div>
+      <div class="lane-line"></div>
+      <div class="lane-line"></div>
+    </div>
+
+    <!--
+      Falling beans: vertical jelly bean 10x16 grid
+      Body rows:
+        row 0:  x=2,w=6   (narrow top cap)
+        row 1:  x=1,w=8   (shoulder)
+        rows 2-13: x=0,w=10 (full width body)
+        row 14: x=1,w=8   (shoulder)
+        row 15: x=2,w=6   (narrow bottom cap)
+      Highlight: rows 2-7, x=1,w=2
+      Crease:   rows 2-13, x=5,w=1
+      Shadow:   rows 2-13, x=8,w=2
+    -->
+
+    <!-- Lane 1 — GREEN bean, top -->
+    <div class="falling-bean" style="left:16px; top:18px;">
+      <svg width="30" height="48" viewBox="0 0 10 16" image-rendering="pixelated">
+        <rect x="2" y="0"  width="6"  height="1" fill="#39b54a"/>
+        <rect x="1" y="1"  width="8"  height="1" fill="#39b54a"/>
+        <rect x="0" y="2"  width="10" height="12" fill="#39b54a"/>
+        <rect x="1" y="14" width="8"  height="1" fill="#39b54a"/>
+        <rect x="2" y="15" width="6"  height="1" fill="#39b54a"/>
+        <rect x="1" y="2"  width="2"  height="6" fill="#5cd66e"/>
+        <rect x="5" y="2"  width="1"  height="12" fill="#2a8a36"/>
+        <rect x="8" y="2"  width="2"  height="12" fill="#2a8a36"/>
+      </svg>
+    </div>
+
+    <!-- Lane 2 — CYAN bean -->
+    <div class="falling-bean" style="left:76px; top:70px;">
+      <svg width="30" height="48" viewBox="0 0 10 16" image-rendering="pixelated">
+        <rect x="2" y="0"  width="6"  height="1" fill="#00e5ff"/>
+        <rect x="1" y="1"  width="8"  height="1" fill="#00e5ff"/>
+        <rect x="0" y="2"  width="10" height="12" fill="#00e5ff"/>
+        <rect x="1" y="14" width="8"  height="1" fill="#00e5ff"/>
+        <rect x="2" y="15" width="6"  height="1" fill="#00e5ff"/>
+        <rect x="1" y="2"  width="2"  height="6" fill="#80f0ff"/>
+        <rect x="5" y="2"  width="1"  height="12" fill="#00a0c0"/>
+        <rect x="8" y="2"  width="2"  height="12" fill="#00a0c0"/>
+      </svg>
+    </div>
+
+    <!-- Lane 3 — YELLOW bean -->
+    <div class="falling-bean" style="left:136px; top:40px;">
+      <svg width="30" height="48" viewBox="0 0 10 16" image-rendering="pixelated">
+        <rect x="2" y="0"  width="6"  height="1" fill="#f7c948"/>
+        <rect x="1" y="1"  width="8"  height="1" fill="#f7c948"/>
+        <rect x="0" y="2"  width="10" height="12" fill="#f7c948"/>
+        <rect x="1" y="14" width="8"  height="1" fill="#f7c948"/>
+        <rect x="2" y="15" width="6"  height="1" fill="#f7c948"/>
+        <rect x="1" y="2"  width="2"  height="6" fill="#ffe580"/>
+        <rect x="5" y="2"  width="1"  height="12" fill="#c4a030"/>
+        <rect x="8" y="2"  width="2"  height="12" fill="#c4a030"/>
+      </svg>
+    </div>
+
+    <!-- Lane 4 — PINK bean -->
+    <div class="falling-bean" style="left:196px; top:14px;">
+      <svg width="30" height="48" viewBox="0 0 10 16" image-rendering="pixelated">
+        <rect x="2" y="0"  width="6"  height="1" fill="#e91e63"/>
+        <rect x="1" y="1"  width="8"  height="1" fill="#e91e63"/>
+        <rect x="0" y="2"  width="10" height="12" fill="#e91e63"/>
+        <rect x="1" y="14" width="8"  height="1" fill="#e91e63"/>
+        <rect x="2" y="15" width="6"  height="1" fill="#e91e63"/>
+        <rect x="1" y="2"  width="2"  height="6" fill="#ff6090"/>
+        <rect x="5" y="2"  width="1"  height="12" fill="#a0104a"/>
+        <rect x="8" y="2"  width="2"  height="12" fill="#a0104a"/>
+      </svg>
+    </div>
+
+    <!-- Lane 1 — ORANGE bean, lower -->
+    <div class="falling-bean" style="left:16px; top:138px;">
+      <svg width="30" height="48" viewBox="0 0 10 16" image-rendering="pixelated">
+        <rect x="2" y="0"  width="6"  height="1" fill="#e8621a"/>
+        <rect x="1" y="1"  width="8"  height="1" fill="#e8621a"/>
+        <rect x="0" y="2"  width="10" height="12" fill="#e8621a"/>
+        <rect x="1" y="14" width="8"  height="1" fill="#e8621a"/>
+        <rect x="2" y="15" width="6"  height="1" fill="#e8621a"/>
+        <rect x="1" y="2"  width="2"  height="6" fill="#f08040"/>
+        <rect x="5" y="2"  width="1"  height="12" fill="#c44010"/>
+        <rect x="8" y="2"  width="2"  height="12" fill="#c44010"/>
+      </svg>
+    </div>
+
+    <!-- Lane 2 — PURPLE bean, lower -->
+    <div class="falling-bean" style="left:76px; top:176px;">
+      <svg width="30" height="48" viewBox="0 0 10 16" image-rendering="pixelated">
+        <rect x="2" y="0"  width="6"  height="1" fill="#9c27b0"/>
+        <rect x="1" y="1"  width="8"  height="1" fill="#9c27b0"/>
+        <rect x="0" y="2"  width="10" height="12" fill="#9c27b0"/>
+        <rect x="1" y="14" width="8"  height="1" fill="#9c27b0"/>
+        <rect x="2" y="15" width="6"  height="1" fill="#9c27b0"/>
+        <rect x="1" y="2"  width="2"  height="6" fill="#ce60e0"/>
+        <rect x="5" y="2"  width="1"  height="12" fill="#6a1880"/>
+        <rect x="8" y="2"  width="2"  height="12" fill="#6a1880"/>
+      </svg>
+    </div>
+
+    <!-- Lane 3 — GREEN bean, near hit zone -->
+    <div class="falling-bean" style="left:136px; top:248px;">
+      <svg width="30" height="48" viewBox="0 0 10 16" image-rendering="pixelated">
+        <rect x="2" y="0"  width="6"  height="1" fill="#39b54a"/>
+        <rect x="1" y="1"  width="8"  height="1" fill="#39b54a"/>
+        <rect x="0" y="2"  width="10" height="12" fill="#39b54a"/>
+        <rect x="1" y="14" width="8"  height="1" fill="#39b54a"/>
+        <rect x="2" y="15" width="6"  height="1" fill="#39b54a"/>
+        <rect x="1" y="2"  width="2"  height="6" fill="#5cd66e"/>
+        <rect x="5" y="2"  width="1"  height="12" fill="#2a8a36"/>
+        <rect x="8" y="2"  width="2"  height="12" fill="#2a8a36"/>
+      </svg>
+    </div>
+
+    <!-- Lane 4 — YELLOW, near hit zone -->
+    <div class="falling-bean" style="left:196px; top:275px;">
+      <svg width="30" height="48" viewBox="0 0 10 16" image-rendering="pixelated">
+        <rect x="2" y="0"  width="6"  height="1" fill="#f7c948"/>
+        <rect x="1" y="1"  width="8"  height="1" fill="#f7c948"/>
+        <rect x="0" y="2"  width="10" height="12" fill="#f7c948"/>
+        <rect x="1" y="14" width="8"  height="1" fill="#f7c948"/>
+        <rect x="2" y="15" width="6"  height="1" fill="#f7c948"/>
+        <rect x="1" y="2"  width="2"  height="6" fill="#ffe580"/>
+        <rect x="5" y="2"  width="1"  height="12" fill="#c4a030"/>
+        <rect x="8" y="2"  width="2"  height="12" fill="#c4a030"/>
+      </svg>
+    </div>
+
+    <!-- SPLAT lane 1 — cyan splat (pixel art) -->
+    <div class="splat" style="left:4px; top:316px;">
+      <svg width="48" height="24" viewBox="0 0 24 12" image-rendering="pixelated">
+        <!-- central blob -->
+        <rect x="4"  y="3"  width="16" height="6" fill="#00e5ff"/>
+        <rect x="2"  y="4"  width="20" height="4" fill="#00e5ff"/>
+        <rect x="6"  y="2"  width="12" height="8" fill="#00e5ff"/>
+        <!-- splatter drops -->
+        <rect x="1"  y="3"  width="2"  height="2" fill="#00e5ff"/>
+        <rect x="21" y="4"  width="2"  height="2" fill="#00e5ff"/>
+        <rect x="4"  y="1"  width="2"  height="2" fill="#00e5ff"/>
+        <rect x="18" y="1"  width="2"  height="2" fill="#00e5ff"/>
+        <rect x="3"  y="9"  width="2"  height="2" fill="#00e5ff"/>
+        <rect x="19" y="9"  width="2"  height="2" fill="#00e5ff"/>
+        <rect x="0"  y="6"  width="2"  height="1" fill="#00e5ff"/>
+        <rect x="22" y="6"  width="2"  height="1" fill="#00e5ff"/>
+        <!-- highlight -->
+        <rect x="7"  y="4"  width="5"  height="2" fill="#80f0ff"/>
+        <!-- crease ghost -->
+        <rect x="12" y="3"  width="1"  height="6" fill="#00a0c0"/>
+      </svg>
+    </div>
+
+    <!-- SPLAT lane 2 — orange splat -->
+    <div class="splat" style="left:62px; top:320px;">
+      <svg width="48" height="24" viewBox="0 0 24 12" image-rendering="pixelated">
+        <rect x="4"  y="3"  width="16" height="6" fill="#e8621a"/>
+        <rect x="2"  y="4"  width="20" height="4" fill="#e8621a"/>
+        <rect x="6"  y="2"  width="12" height="8" fill="#e8621a"/>
+        <rect x="1"  y="3"  width="2"  height="2" fill="#e8621a"/>
+        <rect x="21" y="4"  width="2"  height="2" fill="#e8621a"/>
+        <rect x="4"  y="1"  width="2"  height="2" fill="#e8621a"/>
+        <rect x="18" y="1"  width="2"  height="2" fill="#e8621a"/>
+        <rect x="3"  y="9"  width="2"  height="2" fill="#e8621a"/>
+        <rect x="19" y="9"  width="2"  height="2" fill="#e8621a"/>
+        <rect x="7"  y="4"  width="5"  height="2" fill="#f08040"/>
+        <rect x="12" y="3"  width="1"  height="6" fill="#c44010"/>
+      </svg>
+    </div>
+
+    <!-- score pops -->
+    <div class="score-pop" style="left:10px; top:300px; font-size:9px; color:#00e5ff; letter-spacing:1px;">SMUSH!</div>
+    <div class="score-pop" style="left:68px; top:295px; font-size:9px; color:#e8621a; letter-spacing:1px;">+100</div>
+
+    <!-- Hit zone -->
+    <div class="hit-zone">
+      <div class="hit-target ht-g">
+        <!-- tiny bean inside target -->
+        <svg width="16" height="10" viewBox="0 0 16 10" image-rendering="pixelated">
+          <rect x="4" y="0" width="8"  height="1" fill="#39b54a"/>
+          <rect x="2" y="1" width="12" height="1" fill="#39b54a"/>
+          <rect x="1" y="2" width="14" height="1" fill="#39b54a"/>
+          <rect x="0" y="3" width="16" height="4" fill="#39b54a"/>
+          <rect x="1" y="7" width="14" height="1" fill="#39b54a"/>
+          <rect x="2" y="8" width="12" height="1" fill="#39b54a"/>
+          <rect x="4" y="9" width="8"  height="1" fill="#39b54a"/>
+          <rect x="2" y="3" width="3"  height="3" fill="#5cd66e"/>
+          <rect x="8" y="3" width="1"  height="4" fill="#2a8a36"/>
+        </svg>
+      </div>
+      <div class="hit-target ht-c">
+        <svg width="16" height="10" viewBox="0 0 16 10" image-rendering="pixelated">
+          <rect x="4" y="0" width="8"  height="1" fill="#00e5ff"/>
+          <rect x="2" y="1" width="12" height="1" fill="#00e5ff"/>
+          <rect x="1" y="2" width="14" height="1" fill="#00e5ff"/>
+          <rect x="0" y="3" width="16" height="4" fill="#00e5ff"/>
+          <rect x="1" y="7" width="14" height="1" fill="#00e5ff"/>
+          <rect x="2" y="8" width="12" height="1" fill="#00e5ff"/>
+          <rect x="4" y="9" width="8"  height="1" fill="#00e5ff"/>
+          <rect x="2" y="3" width="3"  height="3" fill="#80f0ff"/>
+          <rect x="8" y="3" width="1"  height="4" fill="#00a0c0"/>
+        </svg>
+      </div>
+      <div class="hit-target ht-y">
+        <svg width="16" height="10" viewBox="0 0 16 10" image-rendering="pixelated">
+          <rect x="4" y="0" width="8"  height="1" fill="#f7c948"/>
+          <rect x="2" y="1" width="12" height="1" fill="#f7c948"/>
+          <rect x="1" y="2" width="14" height="1" fill="#f7c948"/>
+          <rect x="0" y="3" width="16" height="4" fill="#f7c948"/>
+          <rect x="1" y="7" width="14" height="1" fill="#f7c948"/>
+          <rect x="2" y="8" width="12" height="1" fill="#f7c948"/>
+          <rect x="4" y="9" width="8"  height="1" fill="#f7c948"/>
+          <rect x="2" y="3" width="3"  height="3" fill="#ffe580"/>
+          <rect x="8" y="3" width="1"  height="4" fill="#c4a030"/>
+        </svg>
+      </div>
+      <div class="hit-target ht-r">
+        <svg width="16" height="10" viewBox="0 0 16 10" image-rendering="pixelated">
+          <rect x="4" y="0" width="8"  height="1" fill="#e91e63"/>
+          <rect x="2" y="1" width="12" height="1" fill="#e91e63"/>
+          <rect x="1" y="2" width="14" height="1" fill="#e91e63"/>
+          <rect x="0" y="3" width="16" height="4" fill="#e91e63"/>
+          <rect x="1" y="7" width="14" height="1" fill="#e91e63"/>
+          <rect x="2" y="8" width="12" height="1" fill="#e91e63"/>
+          <rect x="4" y="9" width="8"  height="1" fill="#e91e63"/>
+          <rect x="2" y="3" width="3"  height="3" fill="#ff6090"/>
+          <rect x="8" y="3" width="1"  height="4" fill="#a0104a"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time bar -->
+  <div style="padding:8px 14px 28px; display:flex; flex-direction:column; gap:5px;">
+    <div style="display:flex; justify-content:space-between; font-size:7px; color:#333; letter-spacing:2px;">
+      <span>TIME</span><span>00:32</span>
+    </div>
+    <div style="height:4px; background:#111; position:relative;">
+      <div style="position:absolute;left:0;top:0;height:100%;width:65%;background:linear-gradient(to right,var(--green),var(--yellow));"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+<div class="screen-label">02 — Smush Game</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 3 — LEADERBOARD
+══════════════════════════════════════ -->
+<div class="screen-wrap">
+<div class="phone s3">
+<div class="screen-inner">
+
+  <div class="lb-header">
+    <div class="lb-title">LEADERBOARD</div>
+    <div class="lb-sub">Barry's Beans</div>
+    <div class="lb-week">Week of 18 Mar 2026</div>
+  </div>
+
+  <!-- Podium -->
+  <div style="display:flex;justify-content:center;gap:8px;padding:10px 0 6px;align-items:flex-end;">
+    <!-- 2nd -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+      <!-- cyan bean -->
+      <svg width="28" height="18" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="4" y="0" width="8"  height="1" fill="#00e5ff"/>
+        <rect x="2" y="1" width="12" height="1" fill="#00e5ff"/>
+        <rect x="1" y="2" width="14" height="1" fill="#00e5ff"/>
+        <rect x="0" y="3" width="16" height="4" fill="#00e5ff"/>
+        <rect x="1" y="7" width="14" height="1" fill="#00e5ff"/>
+        <rect x="2" y="8" width="12" height="1" fill="#00e5ff"/>
+        <rect x="4" y="9" width="8"  height="1" fill="#00e5ff"/>
+        <rect x="2" y="3" width="3"  height="3" fill="#80f0ff"/>
+        <rect x="8" y="3" width="1"  height="4" fill="#00a0c0"/>
+        <rect x="13" y="3" width="3" height="4" fill="#00a0c0"/>
+      </svg>
+      <div style="font-size:7px;color:#888;letter-spacing:1px;">2ND</div>
+      <div style="width:30px;height:28px;background:#111;border-top:2px solid #888;display:flex;align-items:center;justify-content:center;font-size:13px;color:#888;">2</div>
+    </div>
+    <!-- 1st -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+      <!-- yellow bean larger -->
+      <svg width="36" height="22" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="4" y="0" width="8"  height="1" fill="#f7c948"/>
+        <rect x="2" y="1" width="12" height="1" fill="#f7c948"/>
+        <rect x="1" y="2" width="14" height="1" fill="#f7c948"/>
+        <rect x="0" y="3" width="16" height="4" fill="#f7c948"/>
+        <rect x="1" y="7" width="14" height="1" fill="#f7c948"/>
+        <rect x="2" y="8" width="12" height="1" fill="#f7c948"/>
+        <rect x="4" y="9" width="8"  height="1" fill="#f7c948"/>
+        <rect x="2" y="3" width="3"  height="3" fill="#ffe580"/>
+        <rect x="8" y="3" width="1"  height="4" fill="#c4a030"/>
+        <rect x="13" y="3" width="3" height="4" fill="#c4a030"/>
+      </svg>
+      <div style="font-size:7px;color:var(--yellow);letter-spacing:1px;">★ 1ST ★</div>
+      <div style="width:38px;height="40px";min-height:40px;background:#131000;border-top:2px solid var(--yellow);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--yellow);">1</div>
+    </div>
+    <!-- 3rd -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+      <!-- orange bean -->
+      <svg width="28" height="18" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="4" y="0" width="8"  height="1" fill="#e8621a"/>
+        <rect x="2" y="1" width="12" height="1" fill="#e8621a"/>
+        <rect x="1" y="2" width="14" height="1" fill="#e8621a"/>
+        <rect x="0" y="3" width="16" height="4" fill="#e8621a"/>
+        <rect x="1" y="7" width="14" height="1" fill="#e8621a"/>
+        <rect x="2" y="8" width="12" height="1" fill="#e8621a"/>
+        <rect x="4" y="9" width="8"  height="1" fill="#e8621a"/>
+        <rect x="2" y="3" width="3"  height="3" fill="#f08040"/>
+        <rect x="8" y="3" width="1"  height="4" fill="#c44010"/>
+        <rect x="13" y="3" width="3" height="4" fill="#c44010"/>
+      </svg>
+      <div style="font-size:7px;color:#cd7f32;letter-spacing:1px;">3RD</div>
+      <div style="width:30px;height:20px;background:#110a00;border-top:2px solid #cd7f32;display:flex;align-items:center;justify-content:center;font-size:13px;color:#cd7f32;">3</div>
+    </div>
+  </div>
+
+  <div class="lb-list">
+    <div class="lb-row first">
+      <div class="lb-rank">1</div>
+      <svg class="lb-bean" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="4" y="0" width="8"  height="1" fill="#f7c948"/>
+        <rect x="2" y="1" width="12" height="1" fill="#f7c948"/>
+        <rect x="1" y="2" width="14" height="1" fill="#f7c948"/>
+        <rect x="0" y="3" width="16" height="4" fill="#f7c948"/>
+        <rect x="1" y="7" width="14" height="1" fill="#f7c948"/>
+        <rect x="2" y="8" width="12" height="1" fill="#f7c948"/>
+        <rect x="4" y="9" width="8"  height="1" fill="#f7c948"/>
+        <rect x="2" y="3" width="3"  height="3" fill="#ffe580"/>
+        <rect x="8" y="3" width="1"  height="4" fill="#c4a030"/>
+      </svg>
+      <div class="lb-name">SARAH M.</div>
+      <div class="lb-score">9,420</div>
+      <span style="font-size:11px;">👑</span>
+    </div>
+
+    <div class="lb-row second">
+      <div class="lb-rank">2</div>
+      <svg class="lb-bean" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="4" y="0" width="8"  height="1" fill="#00e5ff"/>
+        <rect x="2" y="1" width="12" height="1" fill="#00e5ff"/>
+        <rect x="1" y="2" width="14" height="1" fill="#00e5ff"/>
+        <rect x="0" y="3" width="16" height="4" fill="#00e5ff"/>
+        <rect x="1" y="7" width="14" height="1" fill="#00e5ff"/>
+        <rect x="2" y="8" width="12" height="1" fill="#00e5ff"/>
+        <rect x="4" y="9" width="8"  height="1" fill="#00e5ff"/>
+        <rect x="2" y="3" width="3"  height="3" fill="#80f0ff"/>
+        <rect x="8" y="3" width="1"  height="4" fill="#00a0c0"/>
+      </svg>
+      <div class="lb-name">JAMES T.</div>
+      <div class="lb-score">8,890</div>
+    </div>
+
+    <div class="lb-row third">
+      <div class="lb-rank">3</div>
+      <svg class="lb-bean" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="4" y="0" width="8"  height="1" fill="#e8621a"/>
+        <rect x="2" y="1" width="12" height="1" fill="#e8621a"/>
+        <rect x="1" y="2" width="14" height="1" fill="#e8621a"/>
+        <rect x="0" y="3" width="16" height="4" fill="#e8621a"/>
+        <rect x="1" y="7" width="14" height="1" fill="#e8621a"/>
+        <rect x="2" y="8" width="12" height="1" fill="#e8621a"/>
+        <rect x="4" y="9" width="8"  height="1" fill="#e8621a"/>
+        <rect x="2" y="3" width="3"  height="3" fill="#f08040"/>
+        <rect x="8" y="3" width="1"  height="4" fill="#c44010"/>
+      </svg>
+      <div class="lb-name">PRIYA K.</div>
+      <div class="lb-score">7,350</div>
+    </div>
+
+    <div class="lb-row">
+      <div class="lb-rank">4</div>
+      <svg class="lb-bean" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="4" y="0" width="8"  height="1" fill="#9c27b0"/>
+        <rect x="2" y="1" width="12" height="1" fill="#9c27b0"/>
+        <rect x="1" y="2" width="14" height="1" fill="#9c27b0"/>
+        <rect x="0" y="3" width="16" height="4" fill="#9c27b0"/>
+        <rect x="1" y="7" width="14" height="1" fill="#9c27b0"/>
+        <rect x="2" y="8" width="12" height="1" fill="#9c27b0"/>
+        <rect x="4" y="9" width="8"  height="1" fill="#9c27b0"/>
+        <rect x="2" y="3" width="3"  height="3" fill="#ce60e0"/>
+        <rect x="8" y="3" width="1"  height="4" fill="#6a1880"/>
+      </svg>
+      <div class="lb-name">LIAM O.</div>
+      <div class="lb-score">6,110</div>
+    </div>
+
+    <div class="lb-row">
+      <div class="lb-rank">5</div>
+      <svg class="lb-bean" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="4" y="0" width="8"  height="1" fill="#39b54a"/>
+        <rect x="2" y="1" width="12" height="1" fill="#39b54a"/>
+        <rect x="1" y="2" width="14" height="1" fill="#39b54a"/>
+        <rect x="0" y="3" width="16" height="4" fill="#39b54a"/>
+        <rect x="1" y="7" width="14" height="1" fill="#39b54a"/>
+        <rect x="2" y="8" width="12" height="1" fill="#39b54a"/>
+        <rect x="4" y="9" width="8"  height="1" fill="#39b54a"/>
+        <rect x="2" y="3" width="3"  height="3" fill="#5cd66e"/>
+        <rect x="8" y="3" width="1"  height="4" fill="#2a8a36"/>
+      </svg>
+      <div class="lb-name">NIAMH R.</div>
+      <div class="lb-score">5,800</div>
+    </div>
+
+    <!-- YOU -->
+    <div class="lb-row me">
+      <div class="lb-rank" style="color:var(--cyan);">7</div>
+      <svg class="lb-bean" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="4" y="0" width="8"  height="1" fill="#e91e63"/>
+        <rect x="2" y="1" width="12" height="1" fill="#e91e63"/>
+        <rect x="1" y="2" width="14" height="1" fill="#e91e63"/>
+        <rect x="0" y="3" width="16" height="4" fill="#e91e63"/>
+        <rect x="1" y="7" width="14" height="1" fill="#e91e63"/>
+        <rect x="2" y="8" width="12" height="1" fill="#e91e63"/>
+        <rect x="4" y="9" width="8"  height="1" fill="#e91e63"/>
+        <rect x="2" y="3" width="3"  height="3" fill="#ff6090"/>
+        <rect x="8" y="3" width="1"  height="4" fill="#a0104a"/>
+      </svg>
+      <div class="lb-name">YOU ←</div>
+      <div class="lb-score">4,820</div>
+    </div>
+  </div>
+
+  <div class="lb-footer">
+    <div class="prize-banner">★ TOP SCORE WINS FREE COFFEE ★</div>
+    <div class="my-score-row">
+      <span>YOUR SCORE</span>
+      <span>4,820 pts</span>
+    </div>
+  </div>
+
+</div>
+</div>
+<div class="screen-label">03 — Leaderboard</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 4 — WINNER
+══════════════════════════════════════ -->
+<div class="screen-wrap">
+<div class="phone s4">
+<div class="screen-inner">
+<div class="winner-inner">
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+    <div class="blink-txt">★ THIS WEEK'S WINNER ★</div>
+    <div class="winner-name">SARAH M.</div>
+    <div class="winner-score">9,420 BEANS SMUSHED</div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+    <!-- Pixel coffee cup trophy -->
+    <svg width="100" height="100" viewBox="0 0 50 50" image-rendering="pixelated">
+      <!-- steam -->
+      <rect x="14" y="2"  width="1" height="5" fill="#444"/>
+      <rect x="15" y="3"  width="2" height="1" fill="#444"/>
+      <rect x="13" y="6"  width="2" height="1" fill="#444"/>
+      <rect x="22" y="1"  width="1" height="5" fill="#444"/>
+      <rect x="23" y="2"  width="2" height="1" fill="#444"/>
+      <rect x="21" y="5"  width="2" height="1" fill="#444"/>
+      <rect x="30" y="2"  width="1" height="5" fill="#444"/>
+      <rect x="31" y="3"  width="2" height="1" fill="#444"/>
+      <rect x="29" y="6"  width="2" height="1" fill="#444"/>
+      <!-- cup top rim -->
+      <rect x="10" y="11" width="30" height="3"  fill="#f5f0e8"/>
+      <!-- cup body (trapezoid via rows) -->
+      <rect x="10" y="14" width="30" height="1" fill="#f7c948"/>
+      <rect x="11" y="15" width="28" height="1" fill="#f7c948"/>
+      <rect x="11" y="16" width="28" height="14" fill="#f7c948"/>
+      <rect x="12" y="30" width="26" height="1" fill="#f7c948"/>
+      <rect x="13" y="31" width="24" height="1" fill="#f7c948"/>
+      <rect x="14" y="32" width="22" height="2" fill="#f7c948"/>
+      <!-- cup base -->
+      <rect x="13" y="34" width="24" height="2" fill="#c4a030"/>
+      <!-- shadow right edge -->
+      <rect x="35" y="14" width="4"  height="20" fill="#c4a030"/>
+      <rect x="34" y="14" width="1"  height="20" fill="#d4b040"/>
+      <!-- coffee liquid inside -->
+      <rect x="13" y="17" width="21" height="11" fill="#3a1e08"/>
+      <!-- foam top -->
+      <rect x="13" y="17" width="21" height="3"  fill="#f0e8d8"/>
+      <rect x="14" y="17" width="6"  height="2"  fill="#e0d8c0"/>
+      <rect x="22" y="18" width="4"  height="1"  fill="#e0d8c0"/>
+      <!-- bean logo on cup -->
+      <rect x="19" y="23" width="8"  height="1"  fill="#f7c948"/>
+      <rect x="18" y="24" width="10" height="1"  fill="#f7c948"/>
+      <rect x="17" y="25" width="12" height="3"  fill="#f7c948"/>
+      <rect x="18" y="28" width="10" height="1"  fill="#f7c948"/>
+      <rect x="19" y="29" width="8"  height="1"  fill="#f7c948"/>
+      <rect x="19" y="25" width="4"  height="2"  fill="#ffe580"/>
+      <rect x="24" y="26" width="1"  height="2"  fill="#c4a030"/>
+      <!-- handle -->
+      <rect x="39" y="17" width="3" height="2"  fill="#c4a030"/>
+      <rect x="41" y="19" width="3" height="8"  fill="#c4a030"/>
+      <rect x="39" y="27" width="3" height="2"  fill="#c4a030"/>
+      <!-- pixel stars -->
+      <rect x="4"  y="12" width="2" height="2" fill="#f7c948"/>
+      <rect x="6"  y="11" width="1" height="4" fill="#f7c948"/>
+      <rect x="3"  y="13" width="4" height="1" fill="#f7c948"/>
+      <rect x="43" y="10" width="2" height="2" fill="#f7c948"/>
+      <rect x="45" y="9"  width="1" height="4" fill="#f7c948"/>
+      <rect x="42" y="11" width="4" height="1" fill="#f7c948"/>
+    </svg>
+
+    <!-- Celebration splats row -->
+    <div style="display:flex;gap:6px;justify-content:center;">
+      <!-- green splat -->
+      <svg width="32" height="20" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="3"  y="3"  width="10" height="4" fill="#39b54a"/>
+        <rect x="1"  y="4"  width="14" height="2" fill="#39b54a"/>
+        <rect x="4"  y="2"  width="2"  height="2" fill="#39b54a"/>
+        <rect x="10" y="2"  width="2"  height="2" fill="#39b54a"/>
+        <rect x="2"  y="7"  width="2"  height="2" fill="#39b54a"/>
+        <rect x="12" y="7"  width="2"  height="2" fill="#39b54a"/>
+        <rect x="0"  y="5"  width="1"  height="1" fill="#39b54a"/>
+        <rect x="15" y="5"  width="1"  height="1" fill="#39b54a"/>
+        <rect x="5"  y="4"  width="3"  height="2" fill="#5cd66e"/>
+      </svg>
+      <!-- yellow splat -->
+      <svg width="32" height="20" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="3"  y="3"  width="10" height="4" fill="#f7c948"/>
+        <rect x="1"  y="4"  width="14" height="2" fill="#f7c948"/>
+        <rect x="4"  y="2"  width="2"  height="2" fill="#f7c948"/>
+        <rect x="10" y="2"  width="2"  height="2" fill="#f7c948"/>
+        <rect x="2"  y="7"  width="2"  height="2" fill="#f7c948"/>
+        <rect x="12" y="7"  width="2"  height="2" fill="#f7c948"/>
+        <rect x="0"  y="5"  width="1"  height="1" fill="#f7c948"/>
+        <rect x="15" y="5"  width="1"  height="1" fill="#f7c948"/>
+        <rect x="5"  y="4"  width="3"  height="2" fill="#ffe580"/>
+      </svg>
+      <!-- pink splat -->
+      <svg width="32" height="20" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="3"  y="3"  width="10" height="4" fill="#e91e63"/>
+        <rect x="1"  y="4"  width="14" height="2" fill="#e91e63"/>
+        <rect x="4"  y="2"  width="2"  height="2" fill="#e91e63"/>
+        <rect x="10" y="2"  width="2"  height="2" fill="#e91e63"/>
+        <rect x="2"  y="7"  width="2"  height="2" fill="#e91e63"/>
+        <rect x="12" y="7"  width="2"  height="2" fill="#e91e63"/>
+        <rect x="0"  y="5"  width="1"  height="1" fill="#e91e63"/>
+        <rect x="15" y="5"  width="1"  height="1" fill="#e91e63"/>
+        <rect x="5"  y="4"  width="3"  height="2" fill="#ff6090"/>
+      </svg>
+      <!-- cyan splat -->
+      <svg width="32" height="20" viewBox="0 0 16 10" image-rendering="pixelated">
+        <rect x="3"  y="3"  width="10" height="4" fill="#00e5ff"/>
+        <rect x="1"  y="4"  width="14" height="2" fill="#00e5ff"/>
+        <rect x="4"  y="2"  width="2"  height="2" fill="#00e5ff"/>
+        <rect x="10" y="2"  width="2"  height="2" fill="#00e5ff"/>
+        <rect x="2"  y="7"  width="2"  height="2" fill="#00e5ff"/>
+        <rect x="12" y="7"  width="2"  height="2" fill="#00e5ff"/>
+        <rect x="0"  y="5"  width="1"  height="1" fill="#00e5ff"/>
+        <rect x="15" y="5"  width="1"  height="1" fill="#00e5ff"/>
+        <rect x="5"  y="4"  width="3"  height="2" fill="#80f0ff"/>
+      </svg>
+    </div>
+
+    <div class="winner-message">
+      Top bean smusher this week.<br>Claim your prize at the counter!
+    </div>
+  </div>
+
+  <div class="winner-footer">
+    <div class="coupon">
+      <div class="coupon-label">Free Coffee Code</div>
+      <div class="coupon-code">SMSH-7742</div>
+      <div class="coupon-fine">Show this code at Barry's Beans<br>Valid this week only · One per winner</div>
+    </div>
+    <div class="play-again">Play again tomorrow →</div>
+  </div>
+
+</div>
+</div>
+</div>
+<div class="screen-label">04 — Winner!</div>
+</div>
+
+</div><!-- end screens-row -->
+
+<div style="margin-top:32px;font-size:9px;color:#222;letter-spacing:3px;text-align:center;text-transform:uppercase;">
+  Barry's Beans · Gamified Loyalty App · Digital Prototype · MA UX 2026
+</div>
+
+</body>
+</html>
