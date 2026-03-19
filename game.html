@@ -5,415 +5,574 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Barry's Beans — Smush!</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+/* ── RESET ── */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;background:#000;font-family:'Pixelify Sans',monospace;color:#f5f0e8;overflow:hidden;touch-action:none}
 
-  html, body {
-    width:100%; height:100%;
-    background:#000;
-    font-family:'Pixelify Sans', monospace;
-    color:#f5f0e8;
-    overflow:hidden;
-    touch-action:none;
-  }
+/* ── ROUTER / SCREENS ── */
+#app{position:relative;width:100%;height:100%;overflow:hidden}
 
-  /* ── SCREENS ── */
-  .screen {
-    position:absolute; inset:0;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-    transition:opacity 0.3s;
-  }
-  .screen.hidden { opacity:0; pointer-events:none; }
+.page{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;
+  background:#000;
+  transform:translateX(100%);
+  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  will-change:transform;
+}
+.page.active{transform:translateX(0)}
+.page.exit-left{transform:translateX(-100%)}
 
-  /* ── START SCREEN ── */
-  #start-screen { background:#000; gap:20px; padding:24px; }
+/* ══════════════════════════════════
+   START PAGE  #/
+══════════════════════════════════ */
+#page-start{justify-content:center;gap:0;padding:24px 24px 32px;overflow:hidden}
 
-  .logo { text-align:center; }
-  .logo-bean { width:80px; height:80px; }
-  .logo h1 { font-size:28px; color:#f7c948; letter-spacing:3px; line-height:1.1; margin-top:8px; }
-  .logo p  { font-size:10px; color:#555; letter-spacing:3px; text-transform:uppercase; margin-top:4px; }
+/* falling beans bg canvas */
+#bg-canvas{position:absolute;inset:0;pointer-events:none;opacity:0.18}
 
-  .name-input-wrap {
-    width:100%; max-width:280px;
-    display:flex; flex-direction:column; gap:6px;
-  }
-  .name-input-wrap label { font-size:9px; color:#555; letter-spacing:2px; text-transform:uppercase; }
-  .name-input-wrap input {
-    background:#111; border:2px solid #333; padding:10px 14px;
-    font-family:'Pixelify Sans',monospace; font-size:18px;
-    color:#f7c948; letter-spacing:2px; width:100%;
-    outline:none;
-  }
-  .name-input-wrap input:focus { border-color:#f7c948; }
+.logo{text-align:center;z-index:1;margin-bottom:24px}
+.logo img{width:72px;height:72px;animation:float 3s ease-in-out infinite}
+.logo h1{font-size:30px;color:#f7c948;letter-spacing:3px;line-height:1.1;margin-top:6px}
+.logo p{font-size:9px;color:#555;letter-spacing:4px;text-transform:uppercase;margin-top:5px}
 
-  .btn {
-    width:100%; max-width:280px; padding:14px;
-    font-family:'Pixelify Sans',monospace; font-size:14px;
-    letter-spacing:3px; text-transform:uppercase;
-    border:none; cursor:pointer;
-  }
-  .btn-primary { background:#f7c948; color:#000; box-shadow:4px 4px 0 #c4a030; }
-  .btn-primary:active { transform:translate(2px,2px); box-shadow:2px 2px 0 #c4a030; }
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
-  /* ── LEADERBOARD ── */
-  .lb-wrap {
-    width:100%; max-width:280px;
-    display:flex; flex-direction:column; gap:6px;
-  }
-  .lb-wrap h2 { font-size:10px; color:#555; letter-spacing:2px; text-transform:uppercase; }
-  .lb-table { width:100%; border-collapse:collapse; }
-  .lb-table td { padding:5px 6px; font-size:12px; border-bottom:1px solid #111; }
-  .lb-table td:first-child { color:#555; width:24px; }
-  .lb-table td:last-child  { text-align:right; color:#f7c948; }
-  .lb-table tr.me td       { color:#00e5ff; }
-  .lb-table tr.me td:last-child { color:#00e5ff; }
-  .lb-empty { font-size:11px; color:#333; letter-spacing:1px; text-align:center; padding:10px 0; }
+.card{width:100%;max-width:300px;background:#0d0d0d;border:1px solid #1a1a1a;padding:20px;display:flex;flex-direction:column;gap:14px;z-index:1}
 
-  .loading-txt { font-size:10px; color:#333; letter-spacing:2px; }
+.field-label{font-size:8px;color:#555;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.field-input{background:#111;border:2px solid #222;padding:10px 14px;font-family:'Pixelify Sans',monospace;font-size:20px;color:#f7c948;letter-spacing:3px;width:100%;outline:none;transition:border-color 0.2s}
+.field-input:focus{border-color:#f7c948}
+.field-hint{font-size:8px;color:#333;letter-spacing:1px;margin-top:3px;min-height:14px;transition:color 0.2s}
+.field-hint.show{color:#e8621a}
 
-  /* ── GAME SCREEN ── */
-  #game-screen { background:#000; padding:0; justify-content:flex-start; }
+.btn{width:100%;padding:14px;font-family:'Pixelify Sans',monospace;font-size:13px;letter-spacing:3px;text-transform:uppercase;border:none;cursor:pointer;position:relative;overflow:hidden;transition:transform 0.1s}
+.btn:active{transform:scale(0.97)}
+.btn-yellow{background:#f7c948;color:#000;box-shadow:4px 4px 0 #c4a030}
+.btn-yellow:active{box-shadow:2px 2px 0 #c4a030;transform:translate(2px,2px)}
+.btn-ghost{background:transparent;border:1px solid #222;color:#444}
 
-  .hud {
-    width:100%; display:flex; justify-content:space-between;
-    align-items:center; padding:10px 16px 6px;
-    background:#000; flex-shrink:0;
-    border-bottom:1px solid #111;
-  }
-  .hud-score { display:flex; flex-direction:column; gap:1px; }
-  .hud-label { font-size:7px; color:#555; letter-spacing:2px; text-transform:uppercase; }
-  .hud-val   { font-size:22px; color:#f7c948; letter-spacing:1px; }
-  .hud-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
-  .hud-combo { font-size:13px; color:#e8621a; letter-spacing:1px; }
-  .hud-wave  { font-size:10px; color:#555; letter-spacing:2px; }
+/* ripple */
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.2);transform:scale(0);animation:ripple-anim 0.5s linear;pointer-events:none}
+@keyframes ripple-anim{to{transform:scale(4);opacity:0}}
 
-  .miss-bar {
-    width:100%; display:flex; gap:6px;
-    padding:6px 16px; flex-shrink:0;
-  }
-  .miss-dot {
-    width:10px; height:10px; border-radius:2px;
-    background:#1a0000; border:1px solid #330000;
-    transition:background 0.2s;
-  }
-  .miss-dot.used { background:#d93025; border-color:#d93025; box-shadow:0 0 6px #d93025; }
+/* ══════════════════════════════════
+   LEADERBOARD PAGE  #/scores
+══════════════════════════════════ */
+#page-scores{justify-content:flex-start}
 
-  /* game canvas area */
-  #canvas-wrap {
-    flex:1; width:100%; position:relative; overflow:hidden;
-  }
-  canvas { display:block; width:100%; height:100%; }
+.page-header{width:100%;display:flex;align-items:center;gap:12px;padding:18px 16px 12px;border-bottom:1px solid #111;flex-shrink:0}
+.back-btn{background:none;border:1px solid #222;color:#555;font-family:'Pixelify Sans',monospace;font-size:10px;letter-spacing:1px;padding:5px 10px;cursor:pointer}
+.page-title{font-size:16px;color:#f7c948;letter-spacing:3px}
 
-  /* lane buttons */
-  .lane-btns {
-    width:100%; display:flex;
-    flex-shrink:0; height:72px;
-  }
-  .lane-btn {
-    flex:1; border:none; border-top:2px solid #1a1a1a;
-    border-right:1px solid #111;
-    background:#050508; color:#333;
-    font-family:'Pixelify Sans',monospace;
-    font-size:10px; letter-spacing:1px;
-    cursor:pointer; display:flex;
-    align-items:center; justify-content:center;
-    transition:background 0.08s;
-    -webkit-user-select:none; user-select:none;
-  }
-  .lane-btn:last-child { border-right:none; }
-  .lane-btn:active, .lane-btn.flash { background:#1a1a1a; }
-  .lane-btn.flash-hit { background:#222; }
+.lb-scroll{flex:1;width:100%;overflow-y:auto;padding:12px 16px 24px}
+.lb-scroll::-webkit-scrollbar{display:none}
 
-  /* ── GAMEOVER SCREEN ── */
-  #gameover-screen { background:#000; gap:18px; padding:24px; }
+/* ══════════════════════════════════
+   SHARED LEADERBOARD COMPONENT
+══════════════════════════════════ */
+.lb-list{display:flex;flex-direction:column;gap:1px}
+.lb-row{display:flex;align-items:center;gap:10px;padding:9px 10px;background:#0d0d0d;border-left:2px solid transparent}
+.lb-row.gold{border-color:#f7c948;background:#110e00}
+.lb-row.silver{border-color:#888}
+.lb-row.bronze{border-color:#a0522d}
+.lb-row.me{border-color:#00e5ff;background:#001520}
+.lb-rank{font-size:10px;color:#444;width:18px;text-align:center;flex-shrink:0}
+.lb-row.gold .lb-rank{color:#f7c948}
+.lb-row.silver .lb-rank{color:#aaa}
+.lb-row.bronze .lb-rank{color:#cd7f32}
+.lb-name{flex:1;font-size:11px;color:#f5f0e8;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-row.me .lb-name{color:#00e5ff}
+.lb-wave{font-size:9px;color:#444;letter-spacing:1px}
+.lb-score{font-size:12px;color:#555;letter-spacing:1px;text-align:right}
+.lb-row.gold .lb-score{color:#f7c948}
+.lb-row.me .lb-score{color:#00e5ff}
 
-  .go-title { font-size:24px; color:#d93025; letter-spacing:3px; text-align:center; }
-  .go-newscore { font-size:11px; color:#f7c948; letter-spacing:3px; text-transform:uppercase; text-align:center; }
-  .go-score-big { font-size:48px; color:#f5f0e8; letter-spacing:2px; text-align:center; line-height:1; }
-  .go-wave { font-size:10px; color:#555; letter-spacing:2px; text-align:center; }
+/* loading dots */
+.dots-wrap{display:flex;align-items:center;justify-content:center;gap:6px;padding:24px 0}
+.dot{width:8px;height:8px;border-radius:50%;background:#222;animation:dot-bounce 1.2s infinite ease-in-out}
+.dot:nth-child(1){animation-delay:0s}
+.dot:nth-child(2){animation-delay:0.2s}
+.dot:nth-child(3){animation-delay:0.4s}
+@keyframes dot-bounce{0%,80%,100%{transform:scale(0.6);background:#222}40%{transform:scale(1);background:#f7c948}}
 
-  /* ── WAVE ANNOUNCE ── */
-  #wave-announce {
-    position:absolute; inset:0;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-    pointer-events:none; z-index:20;
-    opacity:0; transition:opacity 0.3s;
-  }
-  #wave-announce.show { opacity:1; }
-  #wave-announce h2 { font-size:32px; color:#f7c948; letter-spacing:4px; text-shadow:0 0 20px #f7c948; }
-  #wave-announce p  { font-size:11px; color:#e8621a; letter-spacing:3px; margin-top:6px; }
+.lb-empty{font-size:11px;color:#333;letter-spacing:2px;text-align:center;padding:32px 0}
 
-  /* ── COMBO POP ── */
-  #combo-pop {
-    position:absolute; top:20%; left:50%;
-    transform:translateX(-50%);
-    font-size:22px; color:#f7c948;
-    letter-spacing:3px; pointer-events:none;
-    z-index:20; opacity:0;
-    text-shadow:0 0 16px #f7c948;
-    transition:opacity 0.4s;
-  }
-  #combo-pop.show { opacity:1; }
+/* ══════════════════════════════════
+   GAME PAGE  #/play
+══════════════════════════════════ */
+#page-game{justify-content:flex-start;padding:0}
+
+.hud{width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 16px 6px;background:#000;flex-shrink:0;border-bottom:1px solid #0d0d0d}
+.hud-score{display:flex;flex-direction:column;gap:1px}
+.hud-label{font-size:7px;color:#555;letter-spacing:2px;text-transform:uppercase}
+.hud-val{font-size:24px;color:#f7c948;letter-spacing:1px;transition:color 0.2s}
+.hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.hud-combo{font-size:12px;color:#e8621a;letter-spacing:1px;min-height:16px;transition:transform 0.15s}
+.hud-combo.bump{transform:scale(1.3)}
+.hud-wave{font-size:9px;color:#444;letter-spacing:2px}
+
+.miss-bar{width:100%;display:flex;gap:5px;padding:5px 16px;flex-shrink:0;align-items:center}
+.miss-label{font-size:7px;color:#333;letter-spacing:1px;text-transform:uppercase;margin-right:2px}
+.miss-dot{width:9px;height:9px;border-radius:1px;background:#0d0000;border:1px solid #1a0000;transition:all 0.25s}
+.miss-dot.used{background:#d93025;border-color:#d93025;box-shadow:0 0 6px #d93025}
+
+#canvas-wrap{flex:1;width:100%;position:relative;overflow:hidden}
+canvas#game-canvas{display:block;width:100%;height:100%}
+
+/* overlays inside canvas-wrap */
+.wave-announce{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:20;opacity:0;transform:translateY(-30px);transition:opacity 0.3s,transform 0.3s}
+.wave-announce.show{opacity:1;transform:translateY(0)}
+.wave-announce h2{font-size:36px;color:#f7c948;letter-spacing:4px;text-shadow:0 0 30px rgba(247,201,72,0.5)}
+.wave-announce p{font-size:11px;color:#e8621a;letter-spacing:3px;margin-top:6px}
+
+.combo-pop{position:absolute;top:18%;left:50%;transform:translateX(-50%);font-size:20px;color:#f7c948;letter-spacing:3px;pointer-events:none;z-index:20;opacity:0;text-shadow:0 0 20px #f7c948;transition:opacity 0.1s}
+.combo-pop.show{opacity:1}
+.combo-pop.hide{opacity:0;transition:opacity 0.5s}
+
+.miss-flash{position:absolute;inset:0;background:rgba(217,48,37,0);pointer-events:none;z-index:15;transition:background 0.05s}
+.miss-flash.show{background:rgba(217,48,37,0.15)}
+
+.lane-btns{width:100%;display:flex;flex-shrink:0;height:76px}
+.lane-btn{flex:1;border:none;border-top:2px solid;background:#050508;cursor:pointer;display:flex;align-items:center;justify-content:center;border-right:1px solid #0d0d0d;-webkit-user-select:none;user-select:none;position:relative;overflow:hidden;transition:background 0.08s}
+.lane-btn:last-child{border-right:none}
+.lane-btn.flash{background:#111}
+
+/* ══════════════════════════════════
+   GAME OVER PAGE  #/over
+══════════════════════════════════ */
+#page-over{justify-content:flex-start;overflow-y:auto;padding:28px 20px 40px;gap:18px}
+#page-over::-webkit-scrollbar{display:none}
+
+.go-header{text-align:center;display:flex;flex-direction:column;gap:6px;width:100%}
+.go-title{font-size:22px;color:#d93025;letter-spacing:3px}
+.go-newscore{font-size:10px;color:#f7c948;letter-spacing:4px;text-transform:uppercase;opacity:0;transition:opacity 0.5s}
+.go-newscore.show{opacity:1}
+.go-score{font-size:54px;color:#f5f0e8;letter-spacing:2px;line-height:1;font-weight:700}
+.go-wave{font-size:9px;color:#555;letter-spacing:2px}
+
+.go-bean-name{font-size:13px;color:#e8621a;letter-spacing:2px;text-align:center}
+
+.section-label{font-size:8px;color:#444;letter-spacing:3px;text-transform:uppercase;width:100%;padding-bottom:4px;border-bottom:1px solid #111}
+
+.btn-row{display:flex;flex-direction:column;gap:8px;width:100%}
 </style>
 </head>
 <body>
+<div id="app">
 
-<!-- ═══════════════════════════
-     START SCREEN
-═══════════════════════════ -->
-<div id="start-screen" class="screen">
-  <div class="logo">
-    <img src="images/yellow bean.svg" class="logo-bean" alt="bean">
-    <h1>BARRY'S<br>BEANS</h1>
-    <p>Smush or lose</p>
-  </div>
+  <!-- ══ START PAGE ══ -->
+  <div class="page" id="page-start">
+    <canvas id="bg-canvas"></canvas>
 
-  <div class="name-input-wrap">
-    <label>Your name</label>
-    <input id="player-name" type="text" maxlength="12" placeholder="ENTER NAME" autocomplete="off" autocorrect="off" spellcheck="false">
-  </div>
-
-  <button class="btn btn-primary" id="play-btn">PLAY →</button>
-
-  <div class="lb-wrap">
-    <h2>⬆ Top Scores</h2>
-    <div id="start-lb"><div class="loading-txt">Loading...</div></div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════
-     GAME SCREEN
-═══════════════════════════ -->
-<div id="game-screen" class="screen hidden">
-  <div class="hud">
-    <div class="hud-score">
-      <div class="hud-label">Score</div>
-      <div class="hud-val" id="hud-score">0</div>
+    <div class="logo">
+      <img src="images/yellow bean.svg" alt="bean" id="logo-bean">
+      <h1>BARRY'S<br>BEANS</h1>
+      <p>Smush or lose</p>
     </div>
-    <div class="hud-right">
-      <div class="hud-combo" id="hud-combo"></div>
-      <div class="hud-wave"  id="hud-wave">Wave 1</div>
+
+    <div class="card">
+      <div>
+        <div class="field-label">Your name</div>
+        <input class="field-input" id="player-name" type="text" maxlength="14"
+          placeholder="ENTER NAME" autocomplete="off" autocorrect="off" spellcheck="false">
+        <div class="field-hint" id="name-hint"></div>
+      </div>
+
+      <button class="btn btn-yellow" id="play-btn">PLAY →</button>
+
+      <button class="btn btn-ghost" id="scores-btn">⬆ Leaderboard</button>
     </div>
   </div>
 
-  <div class="miss-bar" id="miss-bar"></div>
-
-  <div id="canvas-wrap">
-    <canvas id="game-canvas"></canvas>
-    <div id="wave-announce">
-      <h2 id="wave-title">WAVE 1</h2>
-      <p  id="wave-sub">GET READY</p>
+  <!-- ══ LEADERBOARD PAGE ══ -->
+  <div class="page" id="page-scores">
+    <div class="page-header">
+      <button class="back-btn" id="scores-back">← Back</button>
+      <div class="page-title">Leaderboard</div>
     </div>
-    <div id="combo-pop"></div>
+    <div class="lb-scroll" id="scores-lb-wrap">
+      <div class="dots-wrap"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
   </div>
 
-  <div class="lane-btns" id="lane-btns">
-    <button class="lane-btn" data-lane="0" id="btn-0"></button>
-    <button class="lane-btn" data-lane="1" id="btn-1"></button>
-    <button class="lane-btn" data-lane="2" id="btn-2"></button>
-    <button class="lane-btn" data-lane="3" id="btn-3"></button>
+  <!-- ══ GAME PAGE ══ -->
+  <div class="page" id="page-game">
+    <div class="hud">
+      <div class="hud-score">
+        <div class="hud-label">Score</div>
+        <div class="hud-val" id="hud-score">0</div>
+      </div>
+      <div class="hud-right">
+        <div class="hud-combo" id="hud-combo"></div>
+        <div class="hud-wave"  id="hud-wave">Wave 1</div>
+      </div>
+    </div>
+
+    <div class="miss-bar">
+      <div class="miss-label">Lives</div>
+      <div id="miss-dots"></div>
+    </div>
+
+    <div id="canvas-wrap">
+      <canvas id="game-canvas"></canvas>
+      <div class="wave-announce" id="wave-announce">
+        <h2 id="wave-title">WAVE 1</h2>
+        <p  id="wave-sub">GET READY</p>
+      </div>
+      <div class="combo-pop" id="combo-pop"></div>
+      <div class="miss-flash" id="miss-flash"></div>
+    </div>
+
+    <div class="lane-btns" id="lane-btns">
+      <button class="lane-btn" data-lane="0" id="btn-0"></button>
+      <button class="lane-btn" data-lane="1" id="btn-1"></button>
+      <button class="lane-btn" data-lane="2" id="btn-2"></button>
+      <button class="lane-btn" data-lane="3" id="btn-3"></button>
+    </div>
   </div>
-</div>
 
-<!-- ═══════════════════════════
-     GAME OVER SCREEN
-═══════════════════════════ -->
-<div id="gameover-screen" class="screen hidden">
-  <div class="go-title">GAME OVER</div>
-  <div class="go-newscore hidden" id="go-newscore">★ NEW HIGH SCORE ★</div>
-  <div class="go-score-big" id="go-score">0</div>
-  <div class="go-wave" id="go-wave">Reached Wave 1</div>
+  <!-- ══ GAME OVER PAGE ══ -->
+  <div class="page" id="page-over">
+    <div class="go-header">
+      <div class="go-title">GAME OVER</div>
+      <div class="go-newscore" id="go-newscore">★ NEW HIGH SCORE ★</div>
+      <div class="go-score" id="go-score">0</div>
+      <div class="go-wave" id="go-wave">Reached Wave 1</div>
+    </div>
 
-  <div class="lb-wrap">
-    <h2>⬆ Leaderboard</h2>
-    <div id="go-lb"><div class="loading-txt">Saving...</div></div>
+    <div class="go-bean-name" id="go-bean-name"></div>
+
+    <div class="section-label">Leaderboard</div>
+    <div id="go-lb-wrap" style="width:100%">
+      <div class="dots-wrap"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-yellow" id="again-btn">PLAY AGAIN →</button>
+      <button class="btn btn-ghost"  id="home-btn">← Change Name</button>
+    </div>
   </div>
 
-  <button class="btn btn-primary" id="again-btn">PLAY AGAIN →</button>
-  <button class="btn" style="background:transparent;border:1px solid #333;color:#555;margin-top:-10px;" id="home-btn">← Change Name</button>
-</div>
+</div><!-- #app -->
 
 <script>
+'use strict';
+
 // ══════════════════════════════════════════════════
-//  CONFIG
+//  JSONBIN
 // ══════════════════════════════════════════════════
 const BIN_ID  = '69bc3238b7ec241ddc8321c8';
 const API_KEY = '$2a$10$kbD56.gscE/7RX1h17GWgeRiTHx7ciZSmcuBatge4oCCaTHMWDctq';
 const API     = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-const BEAN_IMGS = ['images/yellow bean.svg','images/green bean.svg',
-                   'images/blue bean.svg','images/pink bean.svg','images/read bean.svg'];
-
-// Pre-load bean images
-const beanImgs = BEAN_IMGS.map(src => { const i = new Image(); i.src = src; return i; });
-
-// Lane colours for glow
-const LANE_COLORS = ['#f7c948','#39b54a','#00e5ff','#e91e63'];
-
-// ══════════════════════════════════════════════════
-//  WAVE CONFIG — gets harder each wave
-// ══════════════════════════════════════════════════
-const WAVES = [
-  { speed:180, spawnMs:2000, maxMiss:5, activeLanes:2 },  // 1
-  { speed:220, spawnMs:1600, maxMiss:5, activeLanes:3 },  // 2
-  { speed:270, spawnMs:1300, maxMiss:4, activeLanes:4 },  // 3
-  { speed:330, spawnMs:1100, maxMiss:4, activeLanes:4 },  // 4
-  { speed:390, spawnMs:900,  maxMiss:3, activeLanes:4 },  // 5
-  { speed:450, spawnMs:750,  maxMiss:3, activeLanes:4 },  // 6
-  { speed:520, spawnMs:600,  maxMiss:2, activeLanes:4 },  // 7
-  { speed:600, spawnMs:500,  maxMiss:2, activeLanes:4 },  // 8 — very hard
-];
-function getWave(n) { return WAVES[Math.min(n-1, WAVES.length-1)]; }
-
-// ══════════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════════
-let playerName = '';
-let score = 0, combo = 0, misses = 0, waveNum = 1;
-let beans = [];         // active falling beans
-let splats = [];        // hit animations
-let lastSpawn = 0;
-let gameRunning = false;
-let animId = null;
-let lastTime = 0;
-let waveBeansHit = 0;   // beans hit this wave — advance every 12 hits
-const BEANS_PER_WAVE = 12;
-
-// Canvas
-const canvas  = document.getElementById('game-canvas');
-const ctx     = canvas.getContext('2d');
-let cw = 0, ch = 0, laneW = 0;
-const HIT_ZONE_H  = 70;  // px from bottom where hit zone starts
-const BEAN_SIZE   = 52;  // px
-
-// ══════════════════════════════════════════════════
-//  JSONBIN API
-// ══════════════════════════════════════════════════
 async function fetchScores() {
   try {
-    const r = await fetch(`${API}/latest`, {
-      headers:{ 'X-Master-Key': API_KEY }
-    });
+    const r = await fetch(`${API}/latest`, { headers:{'X-Master-Key':API_KEY} });
     const d = await r.json();
-    return d.record.scores || [];
-  } catch(e) { return []; }
+    return d.record?.scores || [];
+  } catch { return []; }
 }
 
 async function saveScore(name, score, wave) {
   const scores = await fetchScores();
   scores.push({ name, score, wave, date: new Date().toLocaleDateString('en-IE') });
   scores.sort((a,b) => b.score - a.score);
-  const top = scores.slice(0, 20);
+  const top = scores.slice(0, 30);
   await fetch(API, {
     method:'PUT',
-    headers:{ 'Content-Type':'application/json', 'X-Master-Key': API_KEY },
+    headers:{'Content-Type':'application/json','X-Master-Key':API_KEY},
     body: JSON.stringify({ scores: top })
   });
   return top;
 }
 
 // ══════════════════════════════════════════════════
+//  BEAN NAME GENERATOR
+// ══════════════════════════════════════════════════
+const PREFIXES = ['Bean','Beany','Dr. Bean','El Bean','Big Bean','Lord Bean','Señor Bean'];
+const SUFFIXES = ['Bean','Beanie','McBean','O\'Bean','Beanhead','Beanster','von Bean'];
+
+function beanify(name) {
+  if (Math.random() < 0.5) {
+    const p = PREFIXES[Math.floor(Math.random() * PREFIXES.length)];
+    return `${p} ${name}`;
+  } else {
+    const s = SUFFIXES[Math.floor(Math.random() * SUFFIXES.length)];
+    return `${name} ${s}`;
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  ROUTER
+// ══════════════════════════════════════════════════
+const PAGES = { '/':'page-start', '/scores':'page-scores', '/play':'page-game', '/over':'page-over' };
+let currentPage = null;
+let prevPage = null;
+
+function navigate(path, data={}) {
+  window.location.hash = path;
+  routeTo(path, data);
+}
+
+function routeTo(path, data={}) {
+  const pageId = PAGES[path] || 'page-start';
+  if (currentPage === pageId) return;
+
+  // exit old
+  if (currentPage) {
+    const old = document.getElementById(currentPage);
+    old.classList.remove('active');
+    old.classList.add('exit-left');
+    setTimeout(() => old.classList.remove('exit-left'), 400);
+  }
+
+  prevPage = currentPage;
+  currentPage = pageId;
+
+  const next = document.getElementById(pageId);
+  // if going back, slide from left
+  if (data.back) {
+    next.style.transform = 'translateX(-100%)';
+    requestAnimationFrame(() => {
+      next.classList.add('active');
+      next.style.transform = '';
+    });
+  } else {
+    next.classList.add('active');
+  }
+
+  if (path === '/scores') loadScoresPage();
+  if (path === '/over')   setupOverPage(data);
+}
+
+window.addEventListener('hashchange', () => {
+  const path = window.location.hash.replace('#','') || '/';
+  routeTo(path);
+});
+
+// ══════════════════════════════════════════════════
 //  LEADERBOARD RENDER
 // ══════════════════════════════════════════════════
+const MEDALS = ['🥇','🥈','🥉'];
+
 function renderLB(scores, container, highlightName) {
   if (!scores.length) {
     container.innerHTML = '<div class="lb-empty">No scores yet — be first!</div>';
     return;
   }
-  const top10 = scores.slice(0, 10);
-  const medals = ['🥇','🥈','🥉'];
-  const rows = top10.map((s, i) => {
-    const isMe = s.name.toLowerCase() === highlightName?.toLowerCase() && i === top10.findIndex(x => x.name.toLowerCase() === highlightName?.toLowerCase());
-    return `<tr class="${isMe?'me':''}">
-      <td>${medals[i] || i+1}</td>
-      <td>${s.name}</td>
-      <td>Wave ${s.wave}</td>
-      <td>${s.score.toLocaleString()}</td>
-    </tr>`;
+  const rows = scores.slice(0,20).map((s,i) => {
+    const cls = i===0?'gold':i===1?'silver':i===2?'bronze':
+      (highlightName && s.name===highlightName)?'me':'';
+    return `<div class="lb-row ${cls}">
+      <div class="lb-rank">${MEDALS[i]||i+1}</div>
+      <div class="lb-name">${s.name}</div>
+      <div class="lb-wave">W${s.wave}</div>
+      <div class="lb-score">${s.score.toLocaleString()}</div>
+    </div>`;
   }).join('');
-  container.innerHTML = `<table class="lb-table"><tbody>${rows}</tbody></table>`;
+  container.innerHTML = `<div class="lb-list">${rows}</div>`;
+}
+
+function dotsHTML() {
+  return `<div class="dots-wrap"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+}
+
+async function loadScoresPage() {
+  const wrap = document.getElementById('scores-lb-wrap');
+  wrap.innerHTML = dotsHTML();
+  const scores = await fetchScores();
+  renderLB(scores, wrap, null);
 }
 
 // ══════════════════════════════════════════════════
-//  CANVAS RESIZE
+//  BACKGROUND BEAN RAIN (start page)
 // ══════════════════════════════════════════════════
+const bgCanvas  = document.getElementById('bg-canvas');
+const bgCtx     = bgCanvas.getContext('2d');
+const bgBeans   = [];
+const BEAN_SRCS = ['images/yellow bean.svg','images/green bean.svg','images/blue bean.svg','images/pink bean.svg','images/read bean.svg'];
+const bgImgs    = BEAN_SRCS.map(s => { const i=new Image(); i.src=s; return i; });
+let bgAnim = null;
+
+function initBgBeans() {
+  bgCanvas.width  = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+  bgBeans.length  = 0;
+  for (let i=0; i<12; i++) spawnBgBean(true);
+}
+
+function spawnBgBean(anywhere=false) {
+  bgBeans.push({
+    x: Math.random() * bgCanvas.width,
+    y: anywhere ? Math.random() * bgCanvas.height : -50,
+    size: 28 + Math.random() * 28,
+    speed: 40 + Math.random() * 60,
+    rot: Math.random() * Math.PI * 2,
+    rotSpeed: (Math.random()-0.5) * 1.5,
+    img: bgImgs[Math.floor(Math.random()*bgImgs.length)],
+  });
+}
+
+function bgLoop(ts) {
+  const dt = 0.016;
+  bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
+  for (const b of bgBeans) {
+    b.y += b.speed * dt;
+    b.rot += b.rotSpeed * dt;
+    if (b.img.complete) {
+      bgCtx.save();
+      bgCtx.translate(b.x + b.size/2, b.y + b.size/2);
+      bgCtx.rotate(b.rot);
+      bgCtx.drawImage(b.img, -b.size/2, -b.size/2, b.size, b.size);
+      bgCtx.restore();
+    }
+    if (b.y > bgCanvas.height + 60) {
+      b.y = -60; b.x = Math.random()*bgCanvas.width;
+      b.size = 28+Math.random()*28; b.speed = 40+Math.random()*60;
+    }
+  }
+  bgAnim = requestAnimationFrame(bgLoop);
+}
+
+function startBgAnim() { if (!bgAnim) { initBgBeans(); bgAnim=requestAnimationFrame(bgLoop); } }
+function stopBgAnim()  { cancelAnimationFrame(bgAnim); bgAnim=null; bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height); }
+
+// ══════════════════════════════════════════════════
+//  RIPPLE EFFECT
+// ══════════════════════════════════════════════════
+function addRipple(btn, e) {
+  const r = btn.getBoundingClientRect();
+  const x = (e.clientX || (e.touches&&e.touches[0].clientX) || r.left+r.width/2) - r.left;
+  const y = (e.clientY || (e.touches&&e.touches[0].clientY) || r.top+r.height/2) - r.top;
+  const el = document.createElement('span');
+  el.className = 'ripple';
+  const size = Math.max(r.width,r.height);
+  Object.assign(el.style,{width:size+'px',height:size+'px',left:(x-size/2)+'px',top:(y-size/2)+'px'});
+  btn.appendChild(el);
+  el.addEventListener('animationend', ()=>el.remove());
+}
+
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('pointerdown', e => addRipple(btn, e));
+});
+
+// ══════════════════════════════════════════════════
+//  GAME STATE
+// ══════════════════════════════════════════════════
+const BEAN_IMGS = BEAN_SRCS.map(s => { const i=new Image(); i.src=s; return i; });
+const LANE_COLORS = ['#f7c948','#39b54a','#00e5ff','#e91e63'];
+
+const WAVES = [
+  {speed:170, spawnMs:2100, maxMiss:5, lanes:2},
+  {speed:210, spawnMs:1700, maxMiss:5, lanes:3},
+  {speed:255, spawnMs:1400, maxMiss:4, lanes:4},
+  {speed:310, spawnMs:1150, maxMiss:4, lanes:4},
+  {speed:370, spawnMs:950,  maxMiss:3, lanes:4},
+  {speed:440, spawnMs:780,  maxMiss:3, lanes:4},
+  {speed:520, spawnMs:640,  maxMiss:2, lanes:4},
+  {speed:610, spawnMs:520,  maxMiss:2, lanes:4},
+  {speed:700, spawnMs:430,  maxMiss:1, lanes:4}, // brutal
+];
+const SUBS = ['GET READY','FASTER...','KEEP UP!','DON\'T MISS!','SERIOUSLY?!','INCREDIBLE','LEGENDARY','UNSTOPPABLE','INHUMAN'];
+const getWave = n => WAVES[Math.min(n-1,WAVES.length-1)];
+
+let playerName = '';
+let beanName   = '';
+let score=0, combo=0, misses=0, waveNum=1, waveHits=0;
+let beans=[], splats=[], particles=[];
+let lastSpawn=0, gameRunning=false, animId2=null, lastTs=0;
+const BEANS_PER_WAVE = 14;
+const BEAN_SZ = 50;
+const HIT_H   = 70;
+
+const canvas = document.getElementById('game-canvas');
+const ctx    = canvas.getContext('2d');
+let cw=0, ch=0, laneW=0;
+
 function resizeCanvas() {
   const wrap = document.getElementById('canvas-wrap');
-  cw = wrap.offsetWidth;
-  ch = wrap.offsetHeight;
-  canvas.width  = cw;
-  canvas.height = ch;
-  laneW = cw / 4;
+  cw=wrap.offsetWidth; ch=wrap.offsetHeight;
+  canvas.width=cw; canvas.height=ch; laneW=cw/4;
 }
 
 // ══════════════════════════════════════════════════
-//  BEAN OBJECT
+//  PARTICLES
 // ══════════════════════════════════════════════════
-function spawnBean(wave) {
-  const cfg = getWave(wave);
-  // pick a random lane from active lanes
-  const lanes = Array.from({length:cfg.activeLanes}, (_,i) => i);
-  const lane  = lanes[Math.floor(Math.random() * lanes.length)];
-  const imgIdx = Math.floor(Math.random() * beanImgs.length);
-  return {
-    lane, imgIdx,
-    y: -BEAN_SIZE,
-    x: lane * laneW + laneW/2 - BEAN_SIZE/2,
-    speed: cfg.speed,
-    hit: false, missed: false,
-  };
+function spawnParticles(x, y, color) {
+  for (let i=0; i<10; i++) {
+    const angle = Math.random()*Math.PI*2;
+    const spd   = 80 + Math.random()*140;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle)*spd, vy: Math.sin(angle)*spd,
+      size: 4+Math.random()*6,
+      life: 0.6+Math.random()*0.3,
+      maxLife: 0.9,
+      color,
+    });
+  }
 }
 
 // ══════════════════════════════════════════════════
-//  HUD UPDATE
+//  SCORE COUNT-UP ANIMATION
 // ══════════════════════════════════════════════════
+function animateCount(el, from, to, ms=1200) {
+  const start = performance.now();
+  function step(ts) {
+    const t = Math.min((ts-start)/ms, 1);
+    const ease = 1 - Math.pow(1-t, 3);
+    el.textContent = Math.round(from + (to-from)*ease).toLocaleString();
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ══════════════════════════════════════════════════
+//  HUD
+// ══════════════════════════════════════════════════
+function comboMult() { return combo>=20?5:combo>=10?3:combo>=5?2:1; }
+
 function updateHUD() {
   document.getElementById('hud-score').textContent = score.toLocaleString();
-  const cfg = getWave(waveNum);
-  document.getElementById('hud-combo').textContent = combo >= 2 ? `×${comboMult()} COMBO` : '';
+  const comboEl = document.getElementById('hud-combo');
+  comboEl.textContent = combo>=2 ? `×${comboMult()} COMBO` : '';
   document.getElementById('hud-wave').textContent  = `Wave ${waveNum}`;
 
   // miss dots
-  const bar = document.getElementById('miss-bar');
+  const cfg = getWave(waveNum);
+  const bar = document.getElementById('miss-dots');
   bar.innerHTML = '';
-  for (let i = 0; i < cfg.maxMiss; i++) {
-    const d = document.createElement('div');
-    d.className = 'miss-dot' + (i < misses ? ' used' : '');
+  for (let i=0; i<cfg.maxMiss; i++) {
+    const d=document.createElement('div');
+    d.className='miss-dot'+(i<misses?' used':'');
     bar.appendChild(d);
   }
 }
 
-function comboMult() {
-  if (combo >= 20) return 5;
-  if (combo >= 10) return 3;
-  if (combo >= 5)  return 2;
-  return 1;
-}
-
 // ══════════════════════════════════════════════════
-//  WAVE ANNOUNCEMENT
+//  WAVE ANNOUNCE
 // ══════════════════════════════════════════════════
-function announceWave(n, then) {
-  const el  = document.getElementById('wave-announce');
-  const subtitles = ['GET READY','FASTER...','KEEP UP!','DON\'T MISS!','ALMOST THERE','INCREDIBLE!','LEGENDARY','IMPOSSIBLE'];
+function announceWave(n, cb) {
+  const el = document.getElementById('wave-announce');
   document.getElementById('wave-title').textContent = `WAVE ${n}`;
-  document.getElementById('wave-sub').textContent   = subtitles[Math.min(n-1, subtitles.length-1)];
+  document.getElementById('wave-sub').textContent   = SUBS[Math.min(n-1,SUBS.length-1)];
   el.classList.add('show');
-  setTimeout(() => { el.classList.remove('show'); if(then) then(); }, 1400);
+  setTimeout(()=>{ el.classList.remove('show'); cb&&cb(); }, 1600);
 }
 
 // ══════════════════════════════════════════════════
 //  COMBO POP
 // ══════════════════════════════════════════════════
+let comboTimeout=null;
 function showComboPop(txt) {
-  const el = document.getElementById('combo-pop');
-  el.textContent = txt;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 600);
+  const el=document.getElementById('combo-pop');
+  el.textContent=txt; el.className='combo-pop show';
+  clearTimeout(comboTimeout);
+  comboTimeout=setTimeout(()=>el.className='combo-pop hide', 700);
 }
 
 // ══════════════════════════════════════════════════
@@ -421,126 +580,123 @@ function showComboPop(txt) {
 // ══════════════════════════════════════════════════
 function gameLoop(ts) {
   if (!gameRunning) return;
-  const dt = Math.min((ts - lastTime) / 1000, 0.05);
-  lastTime = ts;
-
+  const dt = Math.min((ts-lastTs)/1000, 0.05);
+  lastTs = ts;
   const cfg = getWave(waveNum);
 
   // Spawn
   if (ts - lastSpawn > cfg.spawnMs) {
-    beans.push(spawnBean(waveNum));
+    const lanePool = Array.from({length:cfg.lanes},(_,i)=>i);
+    const lane = lanePool[Math.floor(Math.random()*lanePool.length)];
+    beans.push({ lane, imgIdx:Math.floor(Math.random()*BEAN_IMGS.length),
+      y:-BEAN_SZ, x:lane*laneW+laneW/2-BEAN_SZ/2,
+      speed:cfg.speed, hit:false, missed:false });
     lastSpawn = ts;
   }
 
-  // Move beans
-  for (const b of beans) {
-    if (!b.hit) b.y += b.speed * dt;
-  }
+  // Move
+  for (const b of beans) if (!b.hit) b.y += b.speed*dt;
 
-  // Check missed (passed hit zone bottom)
+  // Miss check
   for (const b of beans) {
-    if (!b.hit && !b.missed && b.y > ch - HIT_ZONE_H + BEAN_SIZE) {
-      b.missed = true;
-      misses++;
-      combo = 0;
-      // screen shake
-      canvas.style.transform = 'translateX(4px)';
-      setTimeout(() => canvas.style.transform = 'translateX(-4px)', 60);
-      setTimeout(() => canvas.style.transform = '', 120);
+    if (!b.hit && !b.missed && b.y > ch-HIT_H+BEAN_SZ*1.1) {
+      b.missed=true; misses++; combo=0;
       updateHUD();
-      if (misses >= cfg.maxMiss) { endGame(); return; }
+      // flash
+      const fl=document.getElementById('miss-flash');
+      fl.classList.add('show');
+      // canvas shake via CSS
+      canvas.style.transform='translateX(5px)';
+      setTimeout(()=>canvas.style.transform='translateX(-5px)',60);
+      setTimeout(()=>canvas.style.transform='',120);
+      setTimeout(()=>fl.classList.remove('show'),200);
+      if (misses>=cfg.maxMiss) { endGame(); return; }
     }
   }
 
-  // Remove old beans
-  beans = beans.filter(b => b.y < ch + BEAN_SIZE*2 && !b.missed);
+  beans = beans.filter(b=> b.y < ch+BEAN_SZ*2 && !b.missed);
 
-  // Update splats
-  splats = splats.filter(s => s.life > 0);
-  for (const s of splats) { s.life -= dt; s.scale += dt * 4; }
+  // Splats
+  splats = splats.filter(s=>s.life>0);
+  for (const s of splats) { s.life-=dt; s.scale+=dt*6; }
+
+  // Particles
+  particles = particles.filter(p=>p.life>0);
+  for (const p of particles) {
+    p.x+=p.vx*dt; p.y+=p.vy*dt;
+    p.vy+=200*dt; // gravity
+    p.life-=dt;
+  }
 
   draw();
 
-  // Wave progression
-  if (waveBeansHit >= BEANS_PER_WAVE) {
-    waveBeansHit = 0;
-    waveNum++;
-    gameRunning = false;
-    announceWave(waveNum, () => { gameRunning = true; });
+  // Wave up
+  if (waveHits >= BEANS_PER_WAVE) {
+    waveHits=0; waveNum++;
+    gameRunning=false;
+    announceWave(waveNum, ()=>{ gameRunning=true; });
   }
 
-  animId = requestAnimationFrame(gameLoop);
+  animId2 = requestAnimationFrame(gameLoop);
 }
 
-// ══════════════════════════════════════════════════
-//  DRAW
-// ══════════════════════════════════════════════════
 function draw() {
-  ctx.clearRect(0, 0, cw, ch);
+  ctx.clearRect(0,0,cw,ch);
+  ctx.fillStyle='#050508'; ctx.fillRect(0,0,cw,ch);
 
-  // Background
-  ctx.fillStyle = '#050508';
-  ctx.fillRect(0, 0, cw, ch);
-
-  // Lane dividers
-  ctx.strokeStyle = '#111';
-  ctx.lineWidth = 1;
-  for (let i = 1; i < 4; i++) {
-    ctx.beginPath();
-    ctx.moveTo(i * laneW, 0);
-    ctx.lineTo(i * laneW, ch);
-    ctx.stroke();
+  // Lane lines
+  ctx.strokeStyle='#111'; ctx.lineWidth=1;
+  for (let i=1;i<4;i++) {
+    ctx.beginPath(); ctx.moveTo(i*laneW,0); ctx.lineTo(i*laneW,ch); ctx.stroke();
   }
 
-  // Hit zone
-  ctx.fillStyle = '#0a0a10';
-  ctx.fillRect(0, ch - HIT_ZONE_H, cw, HIT_ZONE_H);
-  ctx.strokeStyle = '#1a1a2a';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(0, ch - HIT_ZONE_H);
-  ctx.lineTo(cw, ch - HIT_ZONE_H);
-  ctx.stroke();
+  // Hit zone bg
+  ctx.fillStyle='#0a0a12'; ctx.fillRect(0,ch-HIT_H,cw,HIT_H);
+  ctx.strokeStyle='#1a1a2a'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,ch-HIT_H); ctx.lineTo(cw,ch-HIT_H); ctx.stroke();
 
-  // Hit zone circles (targets)
-  for (let i = 0; i < 4; i++) {
-    const cx = i * laneW + laneW/2;
-    const cy = ch - HIT_ZONE_H/2;
-    ctx.strokeStyle = LANE_COLORS[i] + '44';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 22, 0, Math.PI*2);
-    ctx.stroke();
+  // Hit targets
+  for (let i=0;i<4;i++) {
+    const cx=i*laneW+laneW/2, cy=ch-HIT_H/2;
+    ctx.strokeStyle=LANE_COLORS[i]+'55'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx,cy,20,0,Math.PI*2); ctx.stroke();
   }
 
   // Splats
   for (const s of splats) {
-    const alpha = Math.max(0, s.life / 0.4);
-    ctx.globalAlpha = alpha;
+    const a=Math.max(0,s.life/0.35);
+    ctx.globalAlpha=a;
     if (s.img.complete) {
       ctx.save();
-      ctx.translate(s.x + BEAN_SIZE/2, s.y + BEAN_SIZE/2);
-      ctx.scale(s.scale, 0.3);
-      ctx.drawImage(s.img, -BEAN_SIZE/2, -BEAN_SIZE/2, BEAN_SIZE, BEAN_SIZE);
+      ctx.translate(s.x+BEAN_SZ/2,s.y+BEAN_SZ/2);
+      ctx.scale(s.scale,0.25);
+      ctx.drawImage(s.img,-BEAN_SZ/2,-BEAN_SZ/2,BEAN_SZ,BEAN_SZ);
       ctx.restore();
     }
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha=1;
+  }
+
+  // Particles
+  for (const p of particles) {
+    const a=p.life/p.maxLife;
+    ctx.globalAlpha=Math.max(0,a);
+    ctx.fillStyle=p.color;
+    ctx.fillRect(p.x-p.size/2, p.y-p.size/2, p.size, p.size);
+    ctx.globalAlpha=1;
   }
 
   // Beans
   for (const b of beans) {
     if (b.hit) continue;
-    const img = beanImgs[b.imgIdx];
-    if (img.complete) {
-      // glow when near hit zone
-      const dist = (ch - HIT_ZONE_H) - (b.y + BEAN_SIZE);
-      if (dist < 60 && dist > 0) {
-        ctx.shadowColor = LANE_COLORS[b.lane];
-        ctx.shadowBlur  = 16 * (1 - dist/60);
-      }
-      ctx.drawImage(img, b.x, b.y, BEAN_SIZE, BEAN_SIZE);
-      ctx.shadowBlur = 0;
+    const img=BEAN_IMGS[b.imgIdx];
+    if (!img.complete) continue;
+    const dist=(ch-HIT_H)-(b.y+BEAN_SZ);
+    if (dist<80&&dist>0) {
+      ctx.shadowColor=LANE_COLORS[b.lane];
+      ctx.shadowBlur=20*(1-dist/80);
     }
+    ctx.drawImage(img,b.x,b.y,BEAN_SZ,BEAN_SZ);
+    ctx.shadowBlur=0;
   }
 }
 
@@ -549,130 +705,134 @@ function draw() {
 // ══════════════════════════════════════════════════
 function hitLane(lane) {
   if (!gameRunning) return;
+  const btn=document.getElementById(`btn-${lane}`);
+  btn.classList.add('flash');
+  setTimeout(()=>btn.classList.remove('flash'),120);
 
-  // Flash button
-  const btn = document.getElementById(`btn-${lane}`);
-  btn.classList.add('flash-hit');
-  setTimeout(() => btn.classList.remove('flash-hit'), 120);
-
-  // Find topmost bean in this lane that's in or near hit zone
-  const hitTop    = ch - HIT_ZONE_H - BEAN_SIZE * 0.5;
-  const hitBottom = ch - HIT_ZONE_H + BEAN_SIZE * 1.2;
-
-  let target = null;
-  let bestY  = -Infinity;
+  const hitTop    = ch-HIT_H - BEAN_SZ*0.6;
+  const hitBottom = ch-HIT_H + BEAN_SZ*1.3;
+  let target=null, bestY=-Infinity;
   for (const b of beans) {
-    if (b.lane === lane && !b.hit && !b.missed) {
-      if (b.y >= hitTop && b.y <= hitBottom) {
-        if (b.y > bestY) { bestY = b.y; target = b; }
-      }
+    if (b.lane===lane&&!b.hit&&!b.missed&&b.y>=hitTop&&b.y<=hitBottom) {
+      if (b.y>bestY) { bestY=b.y; target=b; }
     }
   }
+  if (!target) return;
 
-  if (target) {
-    target.hit = true;
-    combo++;
-    waveBeansHit++;
+  target.hit=true; combo++; waveHits++;
+  const mult=comboMult(), pts=100*mult;
+  score+=pts;
 
-    const mult  = comboMult();
-    const pts   = 100 * mult;
-    score += pts;
+  // splat + particles
+  splats.push({x:target.x,y:target.y,img:BEAN_IMGS[target.imgIdx],life:0.35,scale:1});
+  spawnParticles(target.x+BEAN_SZ/2, target.y+BEAN_SZ/2, LANE_COLORS[lane]);
 
-    // splat
-    splats.push({ x:target.x, y:target.y, img:beanImgs[target.imgIdx], life:0.4, scale:1 });
+  // combo milestones
+  const prevMult = (combo-1)>=20?5:(combo-1)>=10?3:(combo-1)>=5?2:1;
+  if (mult>prevMult) showComboPop(`×${mult} COMBO!`);
 
-    // combo milestones
-    if (combo === 5)  showComboPop('×2 COMBO!');
-    if (combo === 10) showComboPop('×3 COMBO!');
-    if (combo === 20) showComboPop('×5 COMBO!');
+  // score bump flash
+  const hv=document.getElementById('hud-score');
+  hv.style.color='#fff';
+  setTimeout(()=>hv.style.color='',150);
 
-    updateHUD();
-  }
-  // missed tap — no penalty, just no score
+  updateHUD();
 }
 
 // ══════════════════════════════════════════════════
 //  START / END
 // ══════════════════════════════════════════════════
 function startGame() {
-  score = 0; combo = 0; misses = 0; waveNum = 1; waveBeansHit = 0;
-  beans = []; splats = []; lastSpawn = 0;
+  score=0; combo=0; misses=0; waveNum=1; waveHits=0;
+  beans=[]; splats=[]; particles=[]; lastSpawn=0;
+  stopBgAnim();
   updateHUD();
-  showScreen('game-screen');
-  resizeCanvas();
-
-  announceWave(1, () => {
-    gameRunning = true;
-    lastTime = performance.now();
-    animId = requestAnimationFrame(gameLoop);
-  });
+  navigate('/play');
+  setTimeout(()=>{
+    resizeCanvas();
+    announceWave(1,()=>{
+      gameRunning=true;
+      lastTs=performance.now();
+      animId2=requestAnimationFrame(gameLoop);
+    });
+  }, 400);
 }
 
 async function endGame() {
-  gameRunning = false;
-  cancelAnimationFrame(animId);
-
-  showScreen('gameover-screen');
-  document.getElementById('go-score').textContent = score.toLocaleString();
-  document.getElementById('go-wave').textContent  = `Reached Wave ${waveNum}`;
-  document.getElementById('go-lb').innerHTML      = '<div class="loading-txt">Saving...</div>';
-
-  const all   = await saveScore(playerName, score, waveNum);
-  const rank  = all.findIndex(s => s.name === playerName && s.score === score) + 1;
-  const isNew = rank === 1;
-
-  document.getElementById('go-newscore').classList.toggle('hidden', !isNew);
-  renderLB(all, document.getElementById('go-lb'), playerName);
+  gameRunning=false;
+  cancelAnimationFrame(animId2);
+  navigate('/over', { score, waveNum, beanName });
 }
 
 // ══════════════════════════════════════════════════
-//  SCREEN SWITCHING
+//  OVER PAGE SETUP
 // ══════════════════════════════════════════════════
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
+async function setupOverPage(data) {
+  const { score:s=0, waveNum:w=1, beanName:bn='' } = data;
+  document.getElementById('go-score').textContent = '0';
+  document.getElementById('go-wave').textContent  = `Reached Wave ${w}`;
+  document.getElementById('go-bean-name').textContent = bn ? `Playing as: ${bn}` : '';
+  document.getElementById('go-newscore').classList.remove('show');
+  document.getElementById('go-lb-wrap').innerHTML = dotsHTML();
+
+  setTimeout(()=> animateCount(document.getElementById('go-score'), 0, s), 200);
+
+  const all  = await saveScore(beanName||playerName, s, w);
+  const rank = all.findIndex(x=>x.name===(beanName||playerName)&&x.score===s)+1;
+  if (rank===1) setTimeout(()=>document.getElementById('go-newscore').classList.add('show'),800);
+  renderLB(all, document.getElementById('go-lb-wrap'), beanName||playerName);
+  startBgAnim(); // resume bg on game over page? no — just start screen
 }
 
 // ══════════════════════════════════════════════════
 //  EVENTS
 // ══════════════════════════════════════════════════
 document.getElementById('play-btn').addEventListener('click', () => {
-  const n = document.getElementById('player-name').value.trim();
-  if (!n) { document.getElementById('player-name').focus(); return; }
-  playerName = n;
-  startGame();
+  const raw = document.getElementById('player-name').value.trim();
+  const hint = document.getElementById('name-hint');
+  if (!raw) {
+    hint.textContent = 'Please enter your name!';
+    hint.classList.add('show');
+    document.getElementById('player-name').focus();
+    return;
+  }
+  hint.classList.remove('show');
+  playerName = raw;
+  beanName   = beanify(raw);
+  document.getElementById('name-hint').textContent = `You are: ${beanName}`;
+  document.getElementById('name-hint').classList.add('show');
+  setTimeout(startGame, 800);
 });
 
+document.getElementById('scores-btn').addEventListener('click', ()=> navigate('/scores'));
+document.getElementById('scores-back').addEventListener('click', ()=> navigate('/', {back:true}));
 document.getElementById('again-btn').addEventListener('click', startGame);
-document.getElementById('home-btn').addEventListener('click',  () => showScreen('start-screen'));
+document.getElementById('home-btn').addEventListener('click', ()=>{ stopBgAnim(); navigate('/',{back:true}); startBgAnim(); });
 
-// Lane button taps — use touchstart for lowest latency
-document.getElementById('lane-btns').addEventListener('touchstart', e => {
+// Lane buttons — touchstart for minimum latency
+document.getElementById('lane-btns').addEventListener('touchstart', e=>{
   e.preventDefault();
   for (const t of e.changedTouches) {
-    const el = document.elementFromPoint(t.clientX, t.clientY);
-    if (el && el.dataset.lane !== undefined) hitLane(+el.dataset.lane);
+    const el=document.elementFromPoint(t.clientX,t.clientY);
+    if (el&&el.dataset.lane!==undefined) hitLane(+el.dataset.lane);
   }
-}, { passive: false });
-
-// Fallback click for desktop testing
-document.getElementById('lane-btns').addEventListener('click', e => {
-  const btn = e.target.closest('.lane-btn');
+},{passive:false});
+document.getElementById('lane-btns').addEventListener('click', e=>{
+  const btn=e.target.closest('.lane-btn');
   if (btn) hitLane(+btn.dataset.lane);
 });
 
 // Lane button colours
-document.querySelectorAll('.lane-btn').forEach((btn, i) => {
-  btn.style.borderTopColor = LANE_COLORS[i] + '55';
+document.querySelectorAll('.lane-btn').forEach((btn,i)=>{
+  btn.style.borderTopColor = LANE_COLORS[i]+'66';
+  btn.style.boxShadow = `inset 0 1px 0 ${LANE_COLORS[i]}22`;
 });
 
 // ══════════════════════════════════════════════════
-//  INIT — load scores on start screen
+//  INIT
 // ══════════════════════════════════════════════════
-(async () => {
-  const scores = await fetchScores();
-  renderLB(scores, document.getElementById('start-lb'), null);
-})();
+navigate('/');
+startBgAnim();
 </script>
 </body>
 </html>
