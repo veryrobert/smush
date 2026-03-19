@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Barry's Beans — Smush!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html, body {
+    width:100%; height:100%;
+    background:#000;
+    font-family:'Pixelify Sans', monospace;
+    color:#f5f0e8;
+    overflow:hidden;
+    touch-action:none;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    transition:opacity 0.3s;
+  }
+  .screen.hidden { opacity:0; pointer-events:none; }
+
+  /* ── START SCREEN ── */
+  #start-screen { background:#000; gap:20px; padding:24px; }
+
+  .logo { text-align:center; }
+  .logo-bean { width:80px; height:80px; }
+  .logo h1 { font-size:28px; color:#f7c948; letter-spacing:3px; line-height:1.1; margin-top:8px; }
+  .logo p  { font-size:10px; color:#555; letter-spacing:3px; text-transform:uppercase; margin-top:4px; }
+
+  .name-input-wrap {
+    width:100%; max-width:280px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .name-input-wrap label { font-size:9px; color:#555; letter-spacing:2px; text-transform:uppercase; }
+  .name-input-wrap input {
+    background:#111; border:2px solid #333; padding:10px 14px;
+    font-family:'Pixelify Sans',monospace; font-size:18px;
+    color:#f7c948; letter-spacing:2px; width:100%;
+    outline:none;
+  }
+  .name-input-wrap input:focus { border-color:#f7c948; }
+
+  .btn {
+    width:100%; max-width:280px; padding:14px;
+    font-family:'Pixelify Sans',monospace; font-size:14px;
+    letter-spacing:3px; text-transform:uppercase;
+    border:none; cursor:pointer;
+  }
+  .btn-primary { background:#f7c948; color:#000; box-shadow:4px 4px 0 #c4a030; }
+  .btn-primary:active { transform:translate(2px,2px); box-shadow:2px 2px 0 #c4a030; }
+
+  /* ── LEADERBOARD ── */
+  .lb-wrap {
+    width:100%; max-width:280px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .lb-wrap h2 { font-size:10px; color:#555; letter-spacing:2px; text-transform:uppercase; }
+  .lb-table { width:100%; border-collapse:collapse; }
+  .lb-table td { padding:5px 6px; font-size:12px; border-bottom:1px solid #111; }
+  .lb-table td:first-child { color:#555; width:24px; }
+  .lb-table td:last-child  { text-align:right; color:#f7c948; }
+  .lb-table tr.me td       { color:#00e5ff; }
+  .lb-table tr.me td:last-child { color:#00e5ff; }
+  .lb-empty { font-size:11px; color:#333; letter-spacing:1px; text-align:center; padding:10px 0; }
+
+  .loading-txt { font-size:10px; color:#333; letter-spacing:2px; }
+
+  /* ── GAME SCREEN ── */
+  #game-screen { background:#000; padding:0; justify-content:flex-start; }
+
+  .hud {
+    width:100%; display:flex; justify-content:space-between;
+    align-items:center; padding:10px 16px 6px;
+    background:#000; flex-shrink:0;
+    border-bottom:1px solid #111;
+  }
+  .hud-score { display:flex; flex-direction:column; gap:1px; }
+  .hud-label { font-size:7px; color:#555; letter-spacing:2px; text-transform:uppercase; }
+  .hud-val   { font-size:22px; color:#f7c948; letter-spacing:1px; }
+  .hud-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .hud-combo { font-size:13px; color:#e8621a; letter-spacing:1px; }
+  .hud-wave  { font-size:10px; color:#555; letter-spacing:2px; }
+
+  .miss-bar {
+    width:100%; display:flex; gap:6px;
+    padding:6px 16px; flex-shrink:0;
+  }
+  .miss-dot {
+    width:10px; height:10px; border-radius:2px;
+    background:#1a0000; border:1px solid #330000;
+    transition:background 0.2s;
+  }
+  .miss-dot.used { background:#d93025; border-color:#d93025; box-shadow:0 0 6px #d93025; }
+
+  /* game canvas area */
+  #canvas-wrap {
+    flex:1; width:100%; position:relative; overflow:hidden;
+  }
+  canvas { display:block; width:100%; height:100%; }
+
+  /* lane buttons */
+  .lane-btns {
+    width:100%; display:flex;
+    flex-shrink:0; height:72px;
+  }
+  .lane-btn {
+    flex:1; border:none; border-top:2px solid #1a1a1a;
+    border-right:1px solid #111;
+    background:#050508; color:#333;
+    font-family:'Pixelify Sans',monospace;
+    font-size:10px; letter-spacing:1px;
+    cursor:pointer; display:flex;
+    align-items:center; justify-content:center;
+    transition:background 0.08s;
+    -webkit-user-select:none; user-select:none;
+  }
+  .lane-btn:last-child { border-right:none; }
+  .lane-btn:active, .lane-btn.flash { background:#1a1a1a; }
+  .lane-btn.flash-hit { background:#222; }
+
+  /* ── GAMEOVER SCREEN ── */
+  #gameover-screen { background:#000; gap:18px; padding:24px; }
+
+  .go-title { font-size:24px; color:#d93025; letter-spacing:3px; text-align:center; }
+  .go-newscore { font-size:11px; color:#f7c948; letter-spacing:3px; text-transform:uppercase; text-align:center; }
+  .go-score-big { font-size:48px; color:#f5f0e8; letter-spacing:2px; text-align:center; line-height:1; }
+  .go-wave { font-size:10px; color:#555; letter-spacing:2px; text-align:center; }
+
+  /* ── WAVE ANNOUNCE ── */
+  #wave-announce {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    pointer-events:none; z-index:20;
+    opacity:0; transition:opacity 0.3s;
+  }
+  #wave-announce.show { opacity:1; }
+  #wave-announce h2 { font-size:32px; color:#f7c948; letter-spacing:4px; text-shadow:0 0 20px #f7c948; }
+  #wave-announce p  { font-size:11px; color:#e8621a; letter-spacing:3px; margin-top:6px; }
+
+  /* ── COMBO POP ── */
+  #combo-pop {
+    position:absolute; top:20%; left:50%;
+    transform:translateX(-50%);
+    font-size:22px; color:#f7c948;
+    letter-spacing:3px; pointer-events:none;
+    z-index:20; opacity:0;
+    text-shadow:0 0 16px #f7c948;
+    transition:opacity 0.4s;
+  }
+  #combo-pop.show { opacity:1; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════
+     START SCREEN
+═══════════════════════════ -->
+<div id="start-screen" class="screen">
+  <div class="logo">
+    <img src="images/yellow bean.svg" class="logo-bean" alt="bean">
+    <h1>BARRY'S<br>BEANS</h1>
+    <p>Smush or lose</p>
+  </div>
+
+  <div class="name-input-wrap">
+    <label>Your name</label>
+    <input id="player-name" type="text" maxlength="12" placeholder="ENTER NAME" autocomplete="off" autocorrect="off" spellcheck="false">
+  </div>
+
+  <button class="btn btn-primary" id="play-btn">PLAY →</button>
+
+  <div class="lb-wrap">
+    <h2>⬆ Top Scores</h2>
+    <div id="start-lb"><div class="loading-txt">Loading...</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     GAME SCREEN
+═══════════════════════════ -->
+<div id="game-screen" class="screen hidden">
+  <div class="hud">
+    <div class="hud-score">
+      <div class="hud-label">Score</div>
+      <div class="hud-val" id="hud-score">0</div>
+    </div>
+    <div class="hud-right">
+      <div class="hud-combo" id="hud-combo"></div>
+      <div class="hud-wave"  id="hud-wave">Wave 1</div>
+    </div>
+  </div>
+
+  <div class="miss-bar" id="miss-bar"></div>
+
+  <div id="canvas-wrap">
+    <canvas id="game-canvas"></canvas>
+    <div id="wave-announce">
+      <h2 id="wave-title">WAVE 1</h2>
+      <p  id="wave-sub">GET READY</p>
+    </div>
+    <div id="combo-pop"></div>
+  </div>
+
+  <div class="lane-btns" id="lane-btns">
+    <button class="lane-btn" data-lane="0" id="btn-0"></button>
+    <button class="lane-btn" data-lane="1" id="btn-1"></button>
+    <button class="lane-btn" data-lane="2" id="btn-2"></button>
+    <button class="lane-btn" data-lane="3" id="btn-3"></button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     GAME OVER SCREEN
+═══════════════════════════ -->
+<div id="gameover-screen" class="screen hidden">
+  <div class="go-title">GAME OVER</div>
+  <div class="go-newscore hidden" id="go-newscore">★ NEW HIGH SCORE ★</div>
+  <div class="go-score-big" id="go-score">0</div>
+  <div class="go-wave" id="go-wave">Reached Wave 1</div>
+
+  <div class="lb-wrap">
+    <h2>⬆ Leaderboard</h2>
+    <div id="go-lb"><div class="loading-txt">Saving...</div></div>
+  </div>
+
+  <button class="btn btn-primary" id="again-btn">PLAY AGAIN →</button>
+  <button class="btn" style="background:transparent;border:1px solid #333;color:#555;margin-top:-10px;" id="home-btn">← Change Name</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════
+const BIN_ID  = '69bc3238b7ec241ddc8321c8';
+const API_KEY = '$2a$10$kbD56.gscE/7RX1h17GWgeRiTHx7ciZSmcuBatge4oCCaTHMWDctq';
+const API     = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+const BEAN_IMGS = ['images/yellow bean.svg','images/green bean.svg',
+                   'images/blue bean.svg','images/pink bean.svg','images/read bean.svg'];
+
+// Pre-load bean images
+const beanImgs = BEAN_IMGS.map(src => { const i = new Image(); i.src = src; return i; });
+
+// Lane colours for glow
+const LANE_COLORS = ['#f7c948','#39b54a','#00e5ff','#e91e63'];
+
+// ══════════════════════════════════════════════════
+//  WAVE CONFIG — gets harder each wave
+// ══════════════════════════════════════════════════
+const WAVES = [
+  { speed:180, spawnMs:2000, maxMiss:5, activeLanes:2 },  // 1
+  { speed:220, spawnMs:1600, maxMiss:5, activeLanes:3 },  // 2
+  { speed:270, spawnMs:1300, maxMiss:4, activeLanes:4 },  // 3
+  { speed:330, spawnMs:1100, maxMiss:4, activeLanes:4 },  // 4
+  { speed:390, spawnMs:900,  maxMiss:3, activeLanes:4 },  // 5
+  { speed:450, spawnMs:750,  maxMiss:3, activeLanes:4 },  // 6
+  { speed:520, spawnMs:600,  maxMiss:2, activeLanes:4 },  // 7
+  { speed:600, spawnMs:500,  maxMiss:2, activeLanes:4 },  // 8 — very hard
+];
+function getWave(n) { return WAVES[Math.min(n-1, WAVES.length-1)]; }
+
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+let playerName = '';
+let score = 0, combo = 0, misses = 0, waveNum = 1;
+let beans = [];         // active falling beans
+let splats = [];        // hit animations
+let lastSpawn = 0;
+let gameRunning = false;
+let animId = null;
+let lastTime = 0;
+let waveBeansHit = 0;   // beans hit this wave — advance every 12 hits
+const BEANS_PER_WAVE = 12;
+
+// Canvas
+const canvas  = document.getElementById('game-canvas');
+const ctx     = canvas.getContext('2d');
+let cw = 0, ch = 0, laneW = 0;
+const HIT_ZONE_H  = 70;  // px from bottom where hit zone starts
+const BEAN_SIZE   = 52;  // px
+
+// ══════════════════════════════════════════════════
+//  JSONBIN API
+// ══════════════════════════════════════════════════
+async function fetchScores() {
+  try {
+    const r = await fetch(`${API}/latest`, {
+      headers:{ 'X-Master-Key': API_KEY }
+    });
+    const d = await r.json();
+    return d.record.scores || [];
+  } catch(e) { return []; }
+}
+
+async function saveScore(name, score, wave) {
+  const scores = await fetchScores();
+  scores.push({ name, score, wave, date: new Date().toLocaleDateString('en-IE') });
+  scores.sort((a,b) => b.score - a.score);
+  const top = scores.slice(0, 20);
+  await fetch(API, {
+    method:'PUT',
+    headers:{ 'Content-Type':'application/json', 'X-Master-Key': API_KEY },
+    body: JSON.stringify({ scores: top })
+  });
+  return top;
+}
+
+// ══════════════════════════════════════════════════
+//  LEADERBOARD RENDER
+// ══════════════════════════════════════════════════
+function renderLB(scores, container, highlightName) {
+  if (!scores.length) {
+    container.innerHTML = '<div class="lb-empty">No scores yet — be first!</div>';
+    return;
+  }
+  const top10 = scores.slice(0, 10);
+  const medals = ['🥇','🥈','🥉'];
+  const rows = top10.map((s, i) => {
+    const isMe = s.name.toLowerCase() === highlightName?.toLowerCase() && i === top10.findIndex(x => x.name.toLowerCase() === highlightName?.toLowerCase());
+    return `<tr class="${isMe?'me':''}">
+      <td>${medals[i] || i+1}</td>
+      <td>${s.name}</td>
+      <td>Wave ${s.wave}</td>
+      <td>${s.score.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+  container.innerHTML = `<table class="lb-table"><tbody>${rows}</tbody></table>`;
+}
+
+// ══════════════════════════════════════════════════
+//  CANVAS RESIZE
+// ══════════════════════════════════════════════════
+function resizeCanvas() {
+  const wrap = document.getElementById('canvas-wrap');
+  cw = wrap.offsetWidth;
+  ch = wrap.offsetHeight;
+  canvas.width  = cw;
+  canvas.height = ch;
+  laneW = cw / 4;
+}
+
+// ══════════════════════════════════════════════════
+//  BEAN OBJECT
+// ══════════════════════════════════════════════════
+function spawnBean(wave) {
+  const cfg = getWave(wave);
+  // pick a random lane from active lanes
+  const lanes = Array.from({length:cfg.activeLanes}, (_,i) => i);
+  const lane  = lanes[Math.floor(Math.random() * lanes.length)];
+  const imgIdx = Math.floor(Math.random() * beanImgs.length);
+  return {
+    lane, imgIdx,
+    y: -BEAN_SIZE,
+    x: lane * laneW + laneW/2 - BEAN_SIZE/2,
+    speed: cfg.speed,
+    hit: false, missed: false,
+  };
+}
+
+// ══════════════════════════════════════════════════
+//  HUD UPDATE
+// ══════════════════════════════════════════════════
+function updateHUD() {
+  document.getElementById('hud-score').textContent = score.toLocaleString();
+  const cfg = getWave(waveNum);
+  document.getElementById('hud-combo').textContent = combo >= 2 ? `×${comboMult()} COMBO` : '';
+  document.getElementById('hud-wave').textContent  = `Wave ${waveNum}`;
+
+  // miss dots
+  const bar = document.getElementById('miss-bar');
+  bar.innerHTML = '';
+  for (let i = 0; i < cfg.maxMiss; i++) {
+    const d = document.createElement('div');
+    d.className = 'miss-dot' + (i < misses ? ' used' : '');
+    bar.appendChild(d);
+  }
+}
+
+function comboMult() {
+  if (combo >= 20) return 5;
+  if (combo >= 10) return 3;
+  if (combo >= 5)  return 2;
+  return 1;
+}
+
+// ══════════════════════════════════════════════════
+//  WAVE ANNOUNCEMENT
+// ══════════════════════════════════════════════════
+function announceWave(n, then) {
+  const el  = document.getElementById('wave-announce');
+  const subtitles = ['GET READY','FASTER...','KEEP UP!','DON\'T MISS!','ALMOST THERE','INCREDIBLE!','LEGENDARY','IMPOSSIBLE'];
+  document.getElementById('wave-title').textContent = `WAVE ${n}`;
+  document.getElementById('wave-sub').textContent   = subtitles[Math.min(n-1, subtitles.length-1)];
+  el.classList.add('show');
+  setTimeout(() => { el.classList.remove('show'); if(then) then(); }, 1400);
+}
+
+// ══════════════════════════════════════════════════
+//  COMBO POP
+// ══════════════════════════════════════════════════
+function showComboPop(txt) {
+  const el = document.getElementById('combo-pop');
+  el.textContent = txt;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 600);
+}
+
+// ══════════════════════════════════════════════════
+//  GAME LOOP
+// ══════════════════════════════════════════════════
+function gameLoop(ts) {
+  if (!gameRunning) return;
+  const dt = Math.min((ts - lastTime) / 1000, 0.05);
+  lastTime = ts;
+
+  const cfg = getWave(waveNum);
+
+  // Spawn
+  if (ts - lastSpawn > cfg.spawnMs) {
+    beans.push(spawnBean(waveNum));
+    lastSpawn = ts;
+  }
+
+  // Move beans
+  for (const b of beans) {
+    if (!b.hit) b.y += b.speed * dt;
+  }
+
+  // Check missed (passed hit zone bottom)
+  for (const b of beans) {
+    if (!b.hit && !b.missed && b.y > ch - HIT_ZONE_H + BEAN_SIZE) {
+      b.missed = true;
+      misses++;
+      combo = 0;
+      // screen shake
+      canvas.style.transform = 'translateX(4px)';
+      setTimeout(() => canvas.style.transform = 'translateX(-4px)', 60);
+      setTimeout(() => canvas.style.transform = '', 120);
+      updateHUD();
+      if (misses >= cfg.maxMiss) { endGame(); return; }
+    }
+  }
+
+  // Remove old beans
+  beans = beans.filter(b => b.y < ch + BEAN_SIZE*2 && !b.missed);
+
+  // Update splats
+  splats = splats.filter(s => s.life > 0);
+  for (const s of splats) { s.life -= dt; s.scale += dt * 4; }
+
+  draw();
+
+  // Wave progression
+  if (waveBeansHit >= BEANS_PER_WAVE) {
+    waveBeansHit = 0;
+    waveNum++;
+    gameRunning = false;
+    announceWave(waveNum, () => { gameRunning = true; });
+  }
+
+  animId = requestAnimationFrame(gameLoop);
+}
+
+// ══════════════════════════════════════════════════
+//  DRAW
+// ══════════════════════════════════════════════════
+function draw() {
+  ctx.clearRect(0, 0, cw, ch);
+
+  // Background
+  ctx.fillStyle = '#050508';
+  ctx.fillRect(0, 0, cw, ch);
+
+  // Lane dividers
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * laneW, 0);
+    ctx.lineTo(i * laneW, ch);
+    ctx.stroke();
+  }
+
+  // Hit zone
+  ctx.fillStyle = '#0a0a10';
+  ctx.fillRect(0, ch - HIT_ZONE_H, cw, HIT_ZONE_H);
+  ctx.strokeStyle = '#1a1a2a';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, ch - HIT_ZONE_H);
+  ctx.lineTo(cw, ch - HIT_ZONE_H);
+  ctx.stroke();
+
+  // Hit zone circles (targets)
+  for (let i = 0; i < 4; i++) {
+    const cx = i * laneW + laneW/2;
+    const cy = ch - HIT_ZONE_H/2;
+    ctx.strokeStyle = LANE_COLORS[i] + '44';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 22, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  // Splats
+  for (const s of splats) {
+    const alpha = Math.max(0, s.life / 0.4);
+    ctx.globalAlpha = alpha;
+    if (s.img.complete) {
+      ctx.save();
+      ctx.translate(s.x + BEAN_SIZE/2, s.y + BEAN_SIZE/2);
+      ctx.scale(s.scale, 0.3);
+      ctx.drawImage(s.img, -BEAN_SIZE/2, -BEAN_SIZE/2, BEAN_SIZE, BEAN_SIZE);
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // Beans
+  for (const b of beans) {
+    if (b.hit) continue;
+    const img = beanImgs[b.imgIdx];
+    if (img.complete) {
+      // glow when near hit zone
+      const dist = (ch - HIT_ZONE_H) - (b.y + BEAN_SIZE);
+      if (dist < 60 && dist > 0) {
+        ctx.shadowColor = LANE_COLORS[b.lane];
+        ctx.shadowBlur  = 16 * (1 - dist/60);
+      }
+      ctx.drawImage(img, b.x, b.y, BEAN_SIZE, BEAN_SIZE);
+      ctx.shadowBlur = 0;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  HIT DETECTION
+// ══════════════════════════════════════════════════
+function hitLane(lane) {
+  if (!gameRunning) return;
+
+  // Flash button
+  const btn = document.getElementById(`btn-${lane}`);
+  btn.classList.add('flash-hit');
+  setTimeout(() => btn.classList.remove('flash-hit'), 120);
+
+  // Find topmost bean in this lane that's in or near hit zone
+  const hitTop    = ch - HIT_ZONE_H - BEAN_SIZE * 0.5;
+  const hitBottom = ch - HIT_ZONE_H + BEAN_SIZE * 1.2;
+
+  let target = null;
+  let bestY  = -Infinity;
+  for (const b of beans) {
+    if (b.lane === lane && !b.hit && !b.missed) {
+      if (b.y >= hitTop && b.y <= hitBottom) {
+        if (b.y > bestY) { bestY = b.y; target = b; }
+      }
+    }
+  }
+
+  if (target) {
+    target.hit = true;
+    combo++;
+    waveBeansHit++;
+
+    const mult  = comboMult();
+    const pts   = 100 * mult;
+    score += pts;
+
+    // splat
+    splats.push({ x:target.x, y:target.y, img:beanImgs[target.imgIdx], life:0.4, scale:1 });
+
+    // combo milestones
+    if (combo === 5)  showComboPop('×2 COMBO!');
+    if (combo === 10) showComboPop('×3 COMBO!');
+    if (combo === 20) showComboPop('×5 COMBO!');
+
+    updateHUD();
+  }
+  // missed tap — no penalty, just no score
+}
+
+// ══════════════════════════════════════════════════
+//  START / END
+// ══════════════════════════════════════════════════
+function startGame() {
+  score = 0; combo = 0; misses = 0; waveNum = 1; waveBeansHit = 0;
+  beans = []; splats = []; lastSpawn = 0;
+  updateHUD();
+  showScreen('game-screen');
+  resizeCanvas();
+
+  announceWave(1, () => {
+    gameRunning = true;
+    lastTime = performance.now();
+    animId = requestAnimationFrame(gameLoop);
+  });
+}
+
+async function endGame() {
+  gameRunning = false;
+  cancelAnimationFrame(animId);
+
+  showScreen('gameover-screen');
+  document.getElementById('go-score').textContent = score.toLocaleString();
+  document.getElementById('go-wave').textContent  = `Reached Wave ${waveNum}`;
+  document.getElementById('go-lb').innerHTML      = '<div class="loading-txt">Saving...</div>';
+
+  const all   = await saveScore(playerName, score, waveNum);
+  const rank  = all.findIndex(s => s.name === playerName && s.score === score) + 1;
+  const isNew = rank === 1;
+
+  document.getElementById('go-newscore').classList.toggle('hidden', !isNew);
+  renderLB(all, document.getElementById('go-lb'), playerName);
+}
+
+// ══════════════════════════════════════════════════
+//  SCREEN SWITCHING
+// ══════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// ══════════════════════════════════════════════════
+//  EVENTS
+// ══════════════════════════════════════════════════
+document.getElementById('play-btn').addEventListener('click', () => {
+  const n = document.getElementById('player-name').value.trim();
+  if (!n) { document.getElementById('player-name').focus(); return; }
+  playerName = n;
+  startGame();
+});
+
+document.getElementById('again-btn').addEventListener('click', startGame);
+document.getElementById('home-btn').addEventListener('click',  () => showScreen('start-screen'));
+
+// Lane button taps — use touchstart for lowest latency
+document.getElementById('lane-btns').addEventListener('touchstart', e => {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el && el.dataset.lane !== undefined) hitLane(+el.dataset.lane);
+  }
+}, { passive: false });
+
+// Fallback click for desktop testing
+document.getElementById('lane-btns').addEventListener('click', e => {
+  const btn = e.target.closest('.lane-btn');
+  if (btn) hitLane(+btn.dataset.lane);
+});
+
+// Lane button colours
+document.querySelectorAll('.lane-btn').forEach((btn, i) => {
+  btn.style.borderTopColor = LANE_COLORS[i] + '55';
+});
+
+// ══════════════════════════════════════════════════
+//  INIT — load scores on start screen
+// ══════════════════════════════════════════════════
+(async () => {
+  const scores = await fetchScores();
+  renderLB(scores, document.getElementById('start-lb'), null);
+})();
+</script>
+</body>
+</html>
