@@ -12,7 +12,7 @@
 html,body{width:100%;height:100%;background:#000;font-family:'Pixelify Sans',monospace;color:#f5f0e8;overflow:hidden;touch-action:none}
 
 /* ── ROUTER / SCREENS ── */
-#app{position:relative;width:100%;height:100%;overflow:hidden}
+#app{position:relative;width:100%;max-width:480px;height:100%;overflow:hidden;margin:0 auto}
 
 .page{
   position:absolute;inset:0;
@@ -151,14 +151,19 @@ canvas#game-canvas{display:block;width:100%;height:100%}
 .how-overlay{position:absolute;inset:0;background:#000;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:28px 24px;opacity:1;transition:opacity 0.3s}
 .how-overlay.hidden{opacity:0;pointer-events:none}
 .how-title{font-size:18px;color:#f7c948;letter-spacing:4px}
-.how-diagram{display:flex;gap:12px;align-items:flex-end;justify-content:center}
-.how-lane{display:flex;flex-direction:column;align-items:center;gap:6px;width:60px}
-.how-bean{font-size:28px;animation:how-drop 1.4s ease-in infinite}
-.how-arrow{font-size:18px;color:#555;animation:how-drop 1.4s ease-in infinite;animation-delay:0.1s}
-.how-ring{font-size:28px;color:#f7c948;text-shadow:0 0 12px #f7c948}
-.how-smash{font-size:10px;color:#39b54a;letter-spacing:2px;animation:how-pop 1.4s ease-in infinite}
-@keyframes how-drop{0%,100%{transform:translateY(-10px);opacity:0.3}60%{transform:translateY(0);opacity:1}70%,99%{transform:translateY(0);opacity:0}}
-@keyframes how-pop{0%,59%{opacity:0;transform:scale(0.8)}70%{opacity:1;transform:scale(1.2)}85%,100%{opacity:0}}
+.how-diagram{display:flex;gap:4px;align-items:center;justify-content:center;width:100%;max-width:260px}
+.how-lane{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;padding:10px 0;background:color-mix(in srgb,var(--lc) 8%,transparent);border-radius:6px}
+.how-bean{font-size:20px;opacity:0.3}
+.how-ring{font-size:20px;color:var(--lc);opacity:0.4}
+.how-btn{font-size:14px;color:var(--lc);opacity:0.4}
+/* active lane animation */
+.how-lane-active{background:color-mix(in srgb,var(--lc) 16%,transparent)}
+.how-bean-active{animation:how-drop 1.6s ease-in infinite;opacity:1}
+.how-ring-active{animation:how-pulse 1.6s ease-in infinite;opacity:1}
+.how-btn-active{animation:how-pop 1.6s ease-in infinite;opacity:1}
+@keyframes how-drop{0%{transform:translateY(-20px);opacity:0}50%{opacity:1}80%{transform:translateY(0);opacity:1}100%{transform:translateY(0);opacity:0}}
+@keyframes how-pulse{0%,60%{transform:scale(1);opacity:0.4}75%{transform:scale(1.3);opacity:1}100%{transform:scale(1);opacity:0.4}}
+@keyframes how-pop{0%,65%{transform:scale(1);opacity:0.3}80%{transform:scale(1.4);opacity:1;color:var(--lc)}100%{transform:scale(1);opacity:0.3}}
 .how-steps{display:flex;flex-direction:column;gap:10px;width:100%;max-width:260px}
 .how-step{font-size:11px;color:#aaa;letter-spacing:1px;display:flex;align-items:flex-start;gap:10px;line-height:1.5}
 .how-step strong{color:#f5f0e8}
@@ -244,17 +249,31 @@ canvas#game-canvas{display:block;width:100%;height:100%}
     <div class="how-overlay hidden" id="how-overlay">
       <div class="how-title">HOW TO PLAY</div>
       <div class="how-diagram">
-        <div class="how-lane">
-          <div class="how-bean how-bean-fall">🫘</div>
-          <div class="how-arrow">↓</div>
+        <div class="how-lane" style="--lc:#f7c948">
+          <img class="how-bean" src="images/yellow bean.svg" width="24" height="24">
           <div class="how-ring">◯</div>
-          <div class="how-smash">TAP!</div>
+          <div class="how-btn">▼</div>
+        </div>
+        <div class="how-lane how-lane-active" style="--lc:#39b54a">
+          <img class="how-bean how-bean-active" src="images/green bean.svg" width="24" height="24">
+          <div class="how-ring how-ring-active">◯</div>
+          <div class="how-btn how-btn-active">▼</div>
+        </div>
+        <div class="how-lane" style="--lc:#00e5ff">
+          <img class="how-bean" src="images/blue bean.svg" width="24" height="24">
+          <div class="how-ring">◯</div>
+          <div class="how-btn">▼</div>
+        </div>
+        <div class="how-lane" style="--lc:#e91e63">
+          <img class="how-bean" src="images/pink bean.svg" width="24" height="24">
+          <div class="how-ring">◯</div>
+          <div class="how-btn">▼</div>
         </div>
       </div>
       <div class="how-steps">
-        <div class="how-step"><span class="how-num">1</span>Beans fall down the lanes</div>
-        <div class="how-step"><span class="how-num">2</span>When a bean hits the ring — <strong>tap that lane</strong></div>
-        <div class="how-step"><span class="how-num">3</span>Miss too many and it's game over</div>
+        <div class="how-step"><span class="how-num">1</span>Beans fall down <strong>4 coloured lanes</strong></div>
+        <div class="how-step"><span class="how-num">2</span>When a bean hits the ring — <strong>tap the button directly below that lane</strong></div>
+        <div class="how-step"><span class="how-num">3</span>Miss <strong>too many</strong> and it's game over</div>
       </div>
       <button class="btn btn-yellow" id="how-ready-btn">LET'S GO →</button>
     </div>
@@ -400,7 +419,7 @@ window.addEventListener('hashchange', () => {
 // ══════════════════════════════════════════════════
 //  LEADERBOARD RENDER
 // ══════════════════════════════════════════════════
-const MEDALS = ['🥇','🥈','🥉'];
+const MEDALS = ['01','02','03'];
 
 function renderLB(scores, container, highlightName) {
   if (!scores.length) {
@@ -530,9 +549,9 @@ const BEAN_IMGS = BEAN_SRCS.map(s => { const i=new Image(); i.src=s; return i; }
 const LANE_COLORS = ['#f7c948','#39b54a','#00e5ff','#e91e63'];
 
 const WAVES = [
-  {speed:170, spawnMs:2100, maxMiss:5, lanes:2},
-  {speed:210, spawnMs:1700, maxMiss:5, lanes:3},
-  {speed:255, spawnMs:1400, maxMiss:4, lanes:4},
+  {speed:140, spawnMs:2400, maxMiss:6, lanes:4},
+  {speed:180, spawnMs:2000, maxMiss:5, lanes:4},
+  {speed:230, spawnMs:1600, maxMiss:5, lanes:4},
   {speed:310, spawnMs:1150, maxMiss:4, lanes:4},
   {speed:370, spawnMs:950,  maxMiss:3, lanes:4},
   {speed:440, spawnMs:780,  maxMiss:3, lanes:4},
@@ -708,9 +727,15 @@ function draw() {
   ctx.clearRect(0,0,cw,ch);
   ctx.fillStyle='#050508'; ctx.fillRect(0,0,cw,ch);
 
-  // Lane lines
-  ctx.strokeStyle='#111'; ctx.lineWidth=1;
+  // Lane colour tints
+  for (let i=0;i<4;i++) {
+    ctx.fillStyle=LANE_COLORS[i]+'0d'; // very subtle tint
+    ctx.fillRect(i*laneW, 0, laneW, ch);
+  }
+
+  // Lane dividers — coloured
   for (let i=1;i<4;i++) {
+    ctx.strokeStyle=LANE_COLORS[i-1]+'33'; ctx.lineWidth=1;
     ctx.beginPath(); ctx.moveTo(i*laneW,0); ctx.lineTo(i*laneW,ch); ctx.stroke();
   }
 
