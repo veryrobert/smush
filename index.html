@@ -58,6 +58,10 @@ html,body{width:100%;height:100vh;height:100svh;background:#000;font-family:'Pix
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
 .card{width:100%;max-width:300px;background:#0d0d0d;border:1px solid #1a1a1a;padding:20px;display:flex;flex-direction:column;gap:14px;z-index:1}
+.dev-bar{display:flex;align-items:center;gap:10px;margin-top:12px;z-index:1;opacity:0.4}
+.dev-label{font-size:8px;color:#555;letter-spacing:2px;text-transform:uppercase}
+.dev-input{width:44px;background:#0d0d0d;border:1px solid #222;color:#f7c948;font-family:'Pixelify Sans',monospace;font-size:13px;text-align:center;padding:4px;-moz-appearance:textfield}
+.dev-input::-webkit-inner-spin-button,.dev-input::-webkit-outer-spin-button{-webkit-appearance:none}
 
 .field-label{font-size:8px;color:#555;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
 .field-input{background:#111;border:2px solid #222;padding:10px 14px;font-family:'Pixelify Sans',monospace;font-size:20px;color:#f7c948;letter-spacing:3px;width:100%;outline:none;transition:border-color 0.2s}
@@ -226,6 +230,11 @@ canvas#game-canvas{display:block;width:100%;height:100%}
       <button class="btn btn-yellow" id="play-btn"><i class="hn hn-play"></i> PLAY</button>
 
       <button class="btn btn-ghost" id="scores-btn"><i class="hn hn-trophy"></i> Leaderboard</button>
+    </div>
+
+    <div class="dev-bar">
+      <span class="dev-label">DEV — start wave</span>
+      <input class="dev-input" id="dev-wave" type="number" min="1" max="9" value="1">
     </div>
   </div>
 
@@ -860,7 +869,8 @@ function hitLane(lane) {
 let hasPlayedBefore = false;
 
 function startGame() {
-  score=0; combo=0; misses=0; waveNum=1; waveHits=0;
+  const devWave = parseInt(document.getElementById('dev-wave').value) || 1;
+  score=0; combo=0; misses=0; waveNum=Math.min(Math.max(devWave,1),9); waveHits=0;
   beans=[]; splats=[]; particles=[]; lastSpawn=0;
   stopBgAnim();
   updateHUD();
