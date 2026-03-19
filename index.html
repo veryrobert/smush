@@ -675,8 +675,7 @@ function gameLoop(ts) {
 
   // Spawn
   if (ts - lastSpawn > cfg.spawnMs) {
-    const lanePool = Array.from({length:cfg.lanes},(_,i)=>i);
-    const lane = lanePool[Math.floor(Math.random()*lanePool.length)];
+    const lane = Math.floor(Math.random()*4);
     beans.push({ lane, imgIdx:lane,
       y:-BEAN_SZ, x:lane*laneW+laneW/2-BEAN_SZ/2,
       speed:cfg.speed, hit:false, missed:false });
