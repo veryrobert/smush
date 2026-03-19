@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__figma__generate_figma_design",
+      "Bash(open \"http://localhost:8765/#figmacapture=358a5808-fe9c-4f0e-ac4d-484f268e93f1&figmaendpoint=https%3A%2F%2Fmcp.figma.com%2Fmcp%2Fcapture%2F358a5808-fe9c-4f0e-ac4d-484f268e93f1%2Fsubmit&figmadelay=1000\")",
+      "Bash(open \"http://localhost:8765/wireframe.html#figmacapture=c1237540-1782-4cb0-b5c1-8b552f067d16&figmaendpoint=https%3A%2F%2Fmcp.figma.com%2Fmcp%2Fcapture%2Fc1237540-1782-4cb0-b5c1-8b552f067d16%2Fsubmit&figmadelay=1000\")"
+    ]
+  }
+}
