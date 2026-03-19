@@ -32,7 +32,7 @@ html,body{width:100%;height:100%;background:#000;font-family:'Pixelify Sans',mon
 #page-start{justify-content:center;gap:0;padding:24px 24px 32px;overflow:hidden}
 
 /* falling beans bg canvas */
-#bg-canvas{position:absolute;inset:0;pointer-events:none;opacity:0.18}
+#bg-canvas{position:absolute;inset:0;pointer-events:none;opacity:0.35}
 
 .logo{text-align:center;z-index:1;margin-bottom:24px}
 .logo img{width:72px;height:72px;animation:float 3s ease-in-out infinite}
@@ -75,7 +75,10 @@ html,body{width:100%;height:100%;background:#000;font-family:'Pixelify Sans',mon
    SHARED LEADERBOARD COMPONENT
 ══════════════════════════════════ */
 .lb-list{display:flex;flex-direction:column;gap:1px}
-.lb-row{display:flex;align-items:center;gap:10px;padding:9px 10px;background:#0d0d0d;border-left:2px solid transparent}
+.lb-row{display:flex;align-items:center;gap:10px;padding:9px 10px;background:#0d0d0d;border-left:2px solid transparent;position:relative}
+.lb-del{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#d93025;font-size:14px;cursor:pointer;opacity:0;padding:4px 6px;font-family:inherit;transition:opacity 0.15s;line-height:1}
+.lb-row:hover .lb-del,.lb-row:focus-within .lb-del{opacity:1}
+@media (pointer:coarse){.lb-del{opacity:0.4}}
 .lb-row.gold{border-color:#f7c948;background:#110e00}
 .lb-row.silver{border-color:#888}
 .lb-row.bronze{border-color:#a0522d}
@@ -136,10 +139,12 @@ canvas#game-canvas{display:block;width:100%;height:100%}
 .miss-flash{position:absolute;inset:0;background:rgba(217,48,37,0);pointer-events:none;z-index:15;transition:background 0.05s}
 .miss-flash.show{background:rgba(217,48,37,0.15)}
 
-.lane-btns{width:100%;display:flex;flex-shrink:0;height:76px}
-.lane-btn{flex:1;border:none;border-top:2px solid;background:#050508;cursor:pointer;display:flex;align-items:center;justify-content:center;border-right:1px solid #0d0d0d;-webkit-user-select:none;user-select:none;position:relative;overflow:hidden;transition:background 0.08s}
+.lane-btns{width:100%;display:flex;flex-shrink:0;height:80px}
+.lane-btn{flex:1;border:none;border-top:3px solid;background:#050508;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-right:1px solid #0d0d0d;-webkit-user-select:none;user-select:none;position:relative;overflow:hidden;transition:background 0.08s}
 .lane-btn:last-child{border-right:none}
 .lane-btn.flash{background:#111}
+.lane-tap{font-size:16px;line-height:1;pointer-events:none}
+.lane-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;opacity:0.7;pointer-events:none}
 
 /* ══════════════════════════════════
    GAME OVER PAGE  #/over
@@ -171,7 +176,7 @@ canvas#game-canvas{display:block;width:100%;height:100%}
     <div class="logo">
       <img src="images/yellow bean.svg" alt="bean" id="logo-bean">
       <h1>BARRY'S<br>BEANS</h1>
-      <p>Smush or lose</p>
+      <p>Smush or get smushed!</p>
     </div>
 
     <div class="card">
@@ -222,16 +227,17 @@ canvas#game-canvas{display:block;width:100%;height:100%}
       <div class="wave-announce" id="wave-announce">
         <h2 id="wave-title">WAVE 1</h2>
         <p  id="wave-sub">GET READY</p>
+        <p  id="wave-hint" style="font-size:9px;color:#888;letter-spacing:2px;margin-top:8px;text-align:center;padding:0 20px;"></p>
       </div>
       <div class="combo-pop" id="combo-pop"></div>
       <div class="miss-flash" id="miss-flash"></div>
     </div>
 
     <div class="lane-btns" id="lane-btns">
-      <button class="lane-btn" data-lane="0" id="btn-0"></button>
-      <button class="lane-btn" data-lane="1" id="btn-1"></button>
-      <button class="lane-btn" data-lane="2" id="btn-2"></button>
-      <button class="lane-btn" data-lane="3" id="btn-3"></button>
+      <button class="lane-btn" data-lane="0" id="btn-0"><span class="lane-tap">▼</span><span class="lane-label">SMASH</span></button>
+      <button class="lane-btn" data-lane="1" id="btn-1"><span class="lane-tap">▼</span><span class="lane-label">SMASH</span></button>
+      <button class="lane-btn" data-lane="2" id="btn-2"><span class="lane-tap">▼</span><span class="lane-label">SMASH</span></button>
+      <button class="lane-btn" data-lane="3" id="btn-3"><span class="lane-tap">▼</span><span class="lane-label">SMASH</span></button>
     </div>
   </div>
 
@@ -293,8 +299,8 @@ async function saveScore(name, score, wave) {
 // ══════════════════════════════════════════════════
 //  BEAN NAME GENERATOR
 // ══════════════════════════════════════════════════
-const PREFIXES = ['Bean','Beany','Dr. Bean','El Bean','Big Bean','Lord Bean','Señor Bean'];
-const SUFFIXES = ['Bean','Beanie','McBean','O\'Bean','Beanhead','Beanster','von Bean'];
+const PREFIXES = ['Bean','Beany','Dr. Bean','El Bean','Big Bean','Lord Bean','Señor Bean','Has-','Jelly','Rowan Bean-','The Great','Captain Bean','Edamame','Sir','DJ Bean'];
+const SUFFIXES = ['Bean','Beanie','McBean','O\'Bean','Beanhead','Beanster','von Bean','the Bean','Been There','Beansworth','del Frijol','Beanosaur','& Beans','Beanardo DiCaprio','Keanu Beans'];
 
 function beanify(name) {
   if (Math.random() < 0.5) {
@@ -367,14 +373,34 @@ function renderLB(scores, container, highlightName) {
   const rows = scores.slice(0,20).map((s,i) => {
     const cls = i===0?'gold':i===1?'silver':i===2?'bronze':
       (highlightName && s.name===highlightName)?'me':'';
-    return `<div class="lb-row ${cls}">
+    return `<div class="lb-row ${cls}" data-idx="${i}">
       <div class="lb-rank">${MEDALS[i]||i+1}</div>
       <div class="lb-name">${s.name}</div>
       <div class="lb-wave">W${s.wave}</div>
       <div class="lb-score">${s.score.toLocaleString()}</div>
+      <button class="lb-del" data-idx="${i}" aria-label="Delete">×</button>
     </div>`;
   }).join('');
   container.innerHTML = `<div class="lb-list">${rows}</div>`;
+  container.querySelectorAll('.lb-del').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const idx = +btn.dataset.idx;
+      btn.textContent = '…';
+      await deleteScore(idx, container, highlightName);
+    });
+  });
+}
+
+async function deleteScore(idx, container, highlightName) {
+  const scores = await fetchScores();
+  scores.splice(idx, 1);
+  await fetch(API, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json','X-Master-Key':API_KEY},
+    body: JSON.stringify({ scores })
+  });
+  renderLB(scores, container, highlightName);
 }
 
 function dotsHTML() {
@@ -560,8 +586,9 @@ function announceWave(n, cb) {
   const el = document.getElementById('wave-announce');
   document.getElementById('wave-title').textContent = `WAVE ${n}`;
   document.getElementById('wave-sub').textContent   = SUBS[Math.min(n-1,SUBS.length-1)];
+  document.getElementById('wave-hint').textContent  = n===1 ? 'TAP YOUR LANE WHEN THE BEAN HITS THE RING' : '';
   el.classList.add('show');
-  setTimeout(()=>{ el.classList.remove('show'); cb&&cb(); }, 1600);
+  setTimeout(()=>{ el.classList.remove('show'); cb&&cb(); }, 1800);
 }
 
 // ══════════════════════════════════════════════════
@@ -658,8 +685,12 @@ function draw() {
   // Hit targets
   for (let i=0;i<4;i++) {
     const cx=i*laneW+laneW/2, cy=ch-HIT_H/2;
-    ctx.strokeStyle=LANE_COLORS[i]+'55'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.arc(cx,cy,20,0,Math.PI*2); ctx.stroke();
+    // outer ring (full color)
+    ctx.strokeStyle=LANE_COLORS[i]; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx,cy,22,0,Math.PI*2); ctx.stroke();
+    // inner dot
+    ctx.fillStyle=LANE_COLORS[i]+'44';
+    ctx.beginPath(); ctx.arc(cx,cy,10,0,Math.PI*2); ctx.fill();
   }
 
   // Splats
@@ -797,8 +828,8 @@ document.getElementById('play-btn').addEventListener('click', () => {
     return;
   }
   hint.classList.remove('show');
-  playerName = raw;
-  beanName   = beanify(raw);
+  playerName = raw.toUpperCase();
+  beanName   = beanify(playerName);
   document.getElementById('name-hint').textContent = `You are: ${beanName}`;
   document.getElementById('name-hint').classList.add('show');
   setTimeout(startGame, 800);
@@ -809,23 +840,15 @@ document.getElementById('scores-back').addEventListener('click', ()=> navigate('
 document.getElementById('again-btn').addEventListener('click', startGame);
 document.getElementById('home-btn').addEventListener('click', ()=>{ stopBgAnim(); navigate('/',{back:true}); startBgAnim(); });
 
-// Lane buttons — touchstart for minimum latency
-document.getElementById('lane-btns').addEventListener('touchstart', e=>{
-  e.preventDefault();
-  for (const t of e.changedTouches) {
-    const el=document.elementFromPoint(t.clientX,t.clientY);
-    if (el&&el.dataset.lane!==undefined) hitLane(+el.dataset.lane);
-  }
-},{passive:false});
-document.getElementById('lane-btns').addEventListener('click', e=>{
-  const btn=e.target.closest('.lane-btn');
-  if (btn) hitLane(+btn.dataset.lane);
-});
+// Lane input handled by pointerdown on each button (see below)
 
-// Lane button colours
+// Lane button colours + direct pointerdown for desktop & mobile
 document.querySelectorAll('.lane-btn').forEach((btn,i)=>{
-  btn.style.borderTopColor = LANE_COLORS[i]+'66';
-  btn.style.boxShadow = `inset 0 1px 0 ${LANE_COLORS[i]}22`;
+  btn.style.borderTopColor = LANE_COLORS[i];
+  btn.style.boxShadow = `inset 0 2px 0 ${LANE_COLORS[i]}44`;
+  btn.querySelector('.lane-tap').style.color = LANE_COLORS[i];
+  btn.querySelector('.lane-label').style.color = LANE_COLORS[i];
+  btn.addEventListener('pointerdown', e=>{ e.preventDefault(); hitLane(i); });
 });
 
 // ══════════════════════════════════════════════════
